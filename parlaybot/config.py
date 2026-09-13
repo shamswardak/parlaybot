@@ -9,6 +9,7 @@ from pathlib import Path
 import yaml
 
 from .builder import BuildConfig
+from .calibration import CalibrationConfig
 from .trends import TrendConfig
 
 
@@ -24,9 +25,13 @@ class Settings:
     ])
     trend: TrendConfig = field(default_factory=TrendConfig)
     build: BuildConfig = field(default_factory=BuildConfig)
+    calibration: CalibrationConfig = field(default_factory=CalibrationConfig)
     discord_webhook: str = ""
+    discord_results_webhook: str = ""
+    use_calibration: bool = True
     dry_run: bool = False
     output_dir: str = "output"
+    history_dir: str = "history"
 
     @classmethod
     def load(cls, path: str | Path = "config.yaml") -> "Settings":
@@ -37,17 +42,23 @@ class Settings:
 
         trend = TrendConfig(**(raw.pop("trend", None) or {}))
         build = BuildConfig(**(raw.pop("build", None) or {}))
+        calib = CalibrationConfig(**(raw.pop("calibration", None) or {}))
 
         band = raw.pop("price_band", None)
         settings = cls(
             trend=trend,
             build=build,
+            calibration=calib,
             price_band=tuple(band) if band else cls.price_band,
             **{k: v for k, v in raw.items() if k in cls.__annotations__},
         )
 
         settings.discord_webhook = (
             os.environ.get("DISCORD_WEBHOOK_URL") or settings.discord_webhook
+        )
+        settings.discord_results_webhook = (
+            os.environ.get("DISCORD_RESULTS_WEBHOOK_URL")
+            or settings.discord_results_webhook
         )
         if os.environ.get("PARLAYBOT_DRY_RUN"):
             settings.dry_run = True

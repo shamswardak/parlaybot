@@ -121,7 +121,8 @@ Repo → Settings → Secrets and variables → Actions → **New repository sec
 
 | Name | Value |
 |---|---|
-| `DISCORD_WEBHOOK_URL` | the webhook URL from step 1 |
+| `DISCORD_WEBHOOK_URL` | webhook for the picks channel |
+| `DISCORD_RESULTS_WEBHOOK_URL` | webhook for the results channel |
 
 ### 4. Run it
 
@@ -143,6 +144,58 @@ python -m parlaybot.main --dry-run          # print, don't post
 python -m parlaybot.main --sports MLB,NFL   # subset
 python -m parlaybot.main --date 2026-10-25  # specific slate
 ```
+
+---
+
+## Results and calibration
+
+Every run grades the previous slates before it builds new tickets, and posts the
+outcome to a second Discord channel.
+
+**Grading** settles each leg the way a sportsbook would:
+
+| | |
+|---|---|
+| **hit** | the player reached the threshold |
+| **miss** | he didn't — and one miss kills the ticket |
+| **void** | he didn't play, the game was postponed, or the stat isn't published yet |
+
+A void is not a loss. The book drops the leg and shortens the parlay, so the
+report shows the settled price, and void legs are excluded from calibration —
+they teach nothing. Because nflverse publishes Sunday's NFL stats a day or two
+late, each run also re-grades the previous three days, settling legs that were
+void the first time. The ledger deduplicates, so nothing gets counted twice.
+
+The report names the exact leg that killed each ticket, and how close it came:
+*"Died on one leg by 1: Jeff McNeil 1+ Hits."* A 20-leg ticket that dies on a
+single leg by one hit is a very different signal from one that dies on six.
+
+**Calibration** is the part that makes results change behaviour. Graded legs go
+into `history/legs.jsonl`; the model's predicted probabilities are then compared
+against what actually happened, bucketed by probability:
+
+```
+78%-83%: model 80.4% vs actual 77.5% (-2.9%) over 1040 legs — applied
+70%-78%: model 77.4% vs actual 50.0% (-27.4%) over 208 legs — applied
+```
+
+Each gap becomes a log-odds shift that future estimates get nudged by. Three
+guardrails keep it from chasing noise:
+
+- nothing applies until a bucket has **60 graded legs**
+- the correction is **shrunk** by `n / (n + 200)`, so early evidence moves it a
+  little and sustained evidence moves it a lot
+- it is **clamped** to ±0.45 in log-odds, so no bad stretch can swing the model
+
+MLB and NFL calibrate separately, falling back to the pooled number until a
+sport has its own sample.
+
+What calibration cannot do is beat the vig. It makes the probabilities honest;
+an honest model still says a 20-leg parlay returns 31 cents on the dollar. That
+is the system working, not failing.
+
+Everything lives in `history/`, committed back to the repo on every run, so the
+record survives and you can inspect or chart it whenever you like.
 
 ---
 
@@ -237,8 +290,13 @@ parlaybot/
   http.py          retries, throttling, disk cache
   discord_out.py   embeds, chunking, console rendering
   config.py        YAML + env
-  main.py          entry point
+  main.py          entry point — build today's tickets
+  grade.py         settle yesterday's legs, find what killed each ticket
+  grade_main.py    entry point — grade, calibrate, report
+  calibration.py   predicted vs actual, shrunk and clamped into a correction
+  results_out.py   results channel embeds
   sources/         mlb.py nfl.py nba.py nhl.py
+history/           committed record: tickets, results, ledger, calibration
 price_check.py     re-price a ticket against the odds you actually got
 demo.py            offline end-to-end demo + Monte Carlo
 run_tests.py       dependency-free test runner

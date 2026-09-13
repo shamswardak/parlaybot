@@ -55,4 +55,16 @@ build:
   error_weight: 12.0      # how hard to push toward the payout target vs. confidence
   max_iterations: 400
 
-output_dir: output
+# Feed graded results back into the model. The grader writes history/legs.jsonl
+# and history/calibration.json; the next build reads the calibration and nudges
+# its probability estimates toward what actually happens.
+use_calibration: true
+
+calibration:
+  min_samples: 60         # graded legs in a bucket before any correction applies
+  prior_weight: 200.0     # shrinkage: correction scales as n / (n + this)
+  max_shift: 0.45         # hard clamp on the correction, in log-odds
+  per_sport: true         # learn MLB and NFL separately, falling back to pooled
+
+output_dir: output        # throwaway copy, picked up as an Actions artifact
+history_dir: history      # committed back to the repo — the grader reads this

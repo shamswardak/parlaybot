@@ -208,3 +208,36 @@ class NFLSource(SportSource):
 
     def short_rest(self, player: PlayerSeason, on: date) -> bool:
         return False  # weekly sport; Thursday games are handled by the schedule
+
+    def actual(self, player_id: str, stat_key: str, on: date) -> float | None:
+        """Look up the weekly stat row for the week containing `on`.
+
+        nflverse publishes weekly stats a day or two after the games, so a
+        Monday grading of Sunday's slate can legitimately find nothing yet --
+        that returns None and the leg stays ungraded rather than scoring wrong.
+        """
+        sched = self._load_schedule()
+        if sched.empty or "gameday" not in sched.columns:
+            return None
+        row = sched[sched["gameday"].astype(str) == on.isoformat()]
+        if row.empty:
+            return None
+        season = int(row.iloc[0]["season"])
+        week = int(row.iloc[0]["week"])
+
+        df = self._weekly_frame(season)
+        if df.empty:
+            return None
+        id_col = _pick(df, "player_id")
+        if not id_col or "week" not in df.columns:
+            return None
+
+        match = df[
+            (df[id_col].astype(str) == str(player_id))
+            & (df["season"] == season)
+            & (df["week"] == week)
+        ]
+        if match.empty:
+            return None
+        value = match.iloc[0].get(stat_key)
+        return float(value) if pd.notna(value) else None

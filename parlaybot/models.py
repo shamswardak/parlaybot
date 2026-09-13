@@ -63,6 +63,7 @@ class Leg:
     game_id: str
     game_label: str
     player: str
+    player_id: str         # stable upstream id -- how the grader finds the result
     team: str
     market: str            # e.g. "Points", "Total Bases"
     threshold: float       # "20+" -> 20
@@ -94,6 +95,8 @@ class Leg:
             "sport": self.sport,
             "game": self.game_label,
             "player": self.player,
+            "player_id": self.player_id,
+            "stat_key": self.stat_key,
             "team": self.team,
             "market": self.market,
             "threshold": self.threshold,

@@ -6,3 +6,6 @@ __pycache__/
 .venv/
 venv/
 .pytest_cache/
+
+# history/ is the permanent record and MUST be committed
+!history/

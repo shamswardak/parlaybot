@@ -119,6 +119,8 @@ def adjust(
     short_rest: bool,
     volatility: float,
     cfg: TrendConfig,
+    calibration=None,
+    sport: str = "",
 ) -> tuple[float, list[str]]:
     """Apply context nudges in log-odds space so the probability stays in (0,1)."""
     x = log_odds(base_prob)
@@ -141,7 +143,19 @@ def adjust(
         x -= cfg.volatility_penalty * (volatility - 0.25)
         notes.append("volatile role")
 
-    return inv_log_odds(x), notes
+    prob = inv_log_odds(x)
+
+    # Correction learned from legs this bot already graded. Applied last, so it
+    # adjusts the finished estimate rather than fighting the other terms.
+    if calibration is not None:
+        adjusted = calibration.apply(sport, prob)
+        if abs(adjusted - prob) > 0.005:
+            notes.append(
+                f"calibrated {prob:.0%}→{adjusted:.0%}"
+            )
+        prob = adjusted
+
+    return prob, notes
 
 
 def confidence_score(
@@ -200,6 +214,7 @@ def build_legs_for_player(
     cfg: TrendConfig,
     hold: float,
     price_band: tuple[float, float],
+    calibration=None,
 ) -> list[Leg]:
     """Produce every viable leg for one player in one game.
 
@@ -239,6 +254,8 @@ def build_legs_for_player(
                 short_rest=short_rest,
                 volatility=volatility,
                 cfg=cfg,
+                calibration=calibration,
+                sport=player.sport,
             )
 
             # A leg is only interesting if the trend is actually live.
@@ -274,6 +291,7 @@ def build_legs_for_player(
                     game_id=game_id,
                     game_label=game_label,
                     player=player.name,
+                    player_id=player.player_id,
                     team=player.team,
                     market=meta["label"],
                     threshold=threshold,

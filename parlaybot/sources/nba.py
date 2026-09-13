@@ -215,3 +215,31 @@ class NBASource(SportSource):
         if not player.logs:
             return False
         return (on - player.logs[0].game_date) <= timedelta(days=1)
+
+    def actual(self, player_id: str, stat_key: str, on: date) -> float | None:
+        """Find the player's line in that day's box scores by personId."""
+        for g in self._load_schedule():
+            if g["date"] != on:
+                continue
+            box = self._boxscore(g["gameId"])
+            if not box:
+                continue
+            game = box.get("game", {})
+            for side in ("homeTeam", "awayTeam"):
+                for p in (game.get(side) or {}).get("players", []):
+                    if str(p.get("personId")) != str(player_id):
+                        continue
+                    st = p.get("statistics") or {}
+                    if _minutes(st.get("minutes")) <= 0:
+                        return None  # DNP settles as a void, not a loss
+                    pts = float(st.get("points", 0) or 0)
+                    reb = float(st.get("reboundsTotal", 0) or 0)
+                    ast = float(st.get("assists", 0) or 0)
+                    return {
+                        "points": pts,
+                        "rebounds": reb,
+                        "assists": ast,
+                        "pra": pts + reb + ast,
+                        "threes": float(st.get("threePointersMade", 0) or 0),
+                    }.get(stat_key)
+        return None

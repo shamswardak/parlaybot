@@ -21,10 +21,20 @@ log = logging.getLogger("parlaybot")
 
 def collect_legs(settings: Settings, on: date, client: HttpClient
                  ) -> tuple[list[Leg], list[str]]:
+    from . import calibration as calib
     from .trends import build_legs_for_player
 
     all_legs: list[Leg] = []
     notes: list[str] = []
+
+    cal = None
+    if settings.use_calibration:
+        cal = calib.load(settings.history_dir)
+        if cal.shifts:
+            notes.append(
+                f"Calibration active: {len(cal.shifts)} bucket(s) corrected from "
+                f"{sum(cal.counts.values())} graded legs."
+            )
 
     for sport in settings.sports:
         source_cls = SOURCES.get(sport)
@@ -69,6 +79,7 @@ def collect_legs(settings: Settings, on: date, client: HttpClient
                         cfg=settings.trend,
                         hold=settings.market_hold,
                         price_band=settings.price_band,
+                        calibration=cal,
                     )
                 )
             except Exception:
@@ -109,9 +120,13 @@ def run(settings: Settings, on: date) -> int:
             discord_out.send(settings.discord_webhook, [], on, notes)
         return 0
 
-    Path(settings.output_dir).mkdir(parents=True, exist_ok=True)
-    out_path = Path(settings.output_dir) / f"parlays-{on.isoformat()}.json"
-    discord_out.write_json(parlays, str(out_path))
+    # history/ is committed back to the repo so the grader can settle these
+    # tomorrow; output/ is the throwaway copy the Actions artifact picks up.
+    for directory in (settings.history_dir, settings.output_dir):
+        Path(directory).mkdir(parents=True, exist_ok=True)
+        discord_out.write_json(
+            parlays, str(Path(directory) / f"parlays-{on.isoformat()}.json")
+        )
 
     text = discord_out.to_console(parlays, on, notes)
     print(text)

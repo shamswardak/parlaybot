@@ -182,3 +182,10 @@ class NHLSource(SportSource):
         if not player.logs:
             return False
         return (on - player.logs[0].game_date) <= timedelta(days=1)
+
+    def actual(self, player_id: str, stat_key: str, on: date) -> float | None:
+        goalie = stat_key in GOALIE_MARKETS
+        player = self._game_log(
+            {"id": player_id, "name": ""}, "", _season_id(on), goalie=goalie
+        )
+        return self._from_logs(player, stat_key, on)

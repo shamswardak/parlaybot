@@ -39,3 +39,30 @@ class SportSource(ABC):
 
     def is_home(self, player: PlayerSeason, matchup: Matchup) -> bool:
         return player.team == matchup.home_team
+
+    def actual(self, player_id: str, stat_key: str, on: date) -> float | None:
+        """What the player actually recorded for `stat_key` on `on`.
+
+        None means "no result": the player didn't appear, the game was
+        postponed, or the upstream has no row. The grader treats that as a void
+        leg rather than a loss, which is how a sportsbook would settle it.
+
+        Sports that can answer override this; the base returns None so a sport
+        without result lookup degrades to "ungraded" instead of scoring wrong.
+        """
+        return None
+
+    @staticmethod
+    def _from_logs(player: PlayerSeason | None, stat_key: str,
+                   on: date) -> float | None:
+        """Pull one stat for one date out of a fetched game log.
+
+        Doubleheaders produce two entries for the same date; books settle most
+        props on the first game, so that is what this returns.
+        """
+        if player is None:
+            return None
+        for entry in reversed(player.logs):  # logs are newest-first
+            if entry.game_date == on:
+                return entry.stats.get(stat_key)
+        return None

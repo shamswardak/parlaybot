@@ -60,7 +60,8 @@ def make_player(name: str, team: str, skill: float, seed: int,
                 minutes=float(rng.randint(3, 5)),
             )
         )
-    return PlayerSeason(player_id=name, name=name, team=team, sport="MLB", logs=logs)
+    return PlayerSeason(player_id=f"id-{name}", name=name, team=team, sport="MLB",
+                        logs=logs)
 
 
 def make_players(matchups: list[Matchup], per_team: int = 7, seed: int = 11

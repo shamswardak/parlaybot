@@ -232,3 +232,9 @@ class MLBSource(SportSource):
         # Baseball position players play daily; only starting pitchers have a
         # meaningful rest signal, and a probable starter is rested by definition.
         return False
+
+    def actual(self, player_id: str, stat_key: str, on: date) -> float | None:
+        group = "pitching" if stat_key in PITCHER_MARKETS else "hitting"
+        season = on.year
+        player = self._player_season(int(player_id), "", "", group, season)
+        return self._from_logs(player, stat_key, on)
