@@ -135,3 +135,35 @@ def test_ledger_records_what_opponent_modelling_will_need():
             assert key in row, f"ledger is missing {key}"
         assert row["opponent"] == "BOS"
         assert row["actual"] == 3
+
+
+def test_grading_picks_up_on_demand_tickets_too():
+    """An ad-hoc ticket writes its own file; it must still get settled."""
+    from parlaybot.grade import load_tickets
+    with tempfile.TemporaryDirectory() as d:
+        day = date(2026, 9, 13)
+        (Path(d) / f"parlays-{day}.json").write_text(
+            json.dumps([{"name": "Safe 20", "legs": []}]))
+        (Path(d) / f"parlays-{day}-ondemand-safe-20-1930.json").write_text(
+            json.dumps([{"name": "Safe 20 (on-demand 19:30)", "legs": []}]))
+        tickets = load_tickets(d, day)
+        assert len(tickets) == 2
+        assert {t["name"] for t in tickets} == {
+            "Safe 20", "Safe 20 (on-demand 19:30)"}
+
+
+def test_grading_returns_none_when_nothing_was_saved():
+    from parlaybot.grade import load_tickets
+    with tempfile.TemporaryDirectory() as d:
+        assert load_tickets(d, date(2026, 9, 13)) is None
+
+
+def test_a_corrupt_ticket_file_does_not_lose_the_others():
+    from parlaybot.grade import load_tickets
+    with tempfile.TemporaryDirectory() as d:
+        day = date(2026, 9, 13)
+        (Path(d) / f"parlays-{day}.json").write_text("{ not json")
+        (Path(d) / f"parlays-{day}-ondemand-x-1930.json").write_text(
+            json.dumps([{"name": "Core 10", "legs": []}]))
+        tickets = load_tickets(d, day)
+        assert tickets and len(tickets) == 1

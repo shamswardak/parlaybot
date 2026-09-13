@@ -33,6 +33,7 @@ class Settings:
     calibration: CalibrationConfig = field(default_factory=CalibrationConfig)
     discord_webhook: str = ""
     discord_results_webhook: str = ""
+    discord_ondemand_webhook: str = ""
     use_calibration: bool = True
     dry_run: bool = False
     output_dir: str = "output"
@@ -69,6 +70,10 @@ class Settings:
         settings.discord_results_webhook = (
             os.environ.get("DISCORD_RESULTS_WEBHOOK_URL")
             or settings.discord_results_webhook
+        )
+        settings.discord_ondemand_webhook = (
+            os.environ.get("DISCORD_ONDEMAND_WEBHOOK_URL")
+            or settings.discord_ondemand_webhook
         )
         if os.environ.get("PARLAYBOT_DRY_RUN"):
             settings.dry_run = True

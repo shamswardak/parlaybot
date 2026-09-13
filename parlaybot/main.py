@@ -114,40 +114,65 @@ def collect_legs(settings: Settings, on: date, client: HttpClient
     return all_legs, notes
 
 
-def run(settings: Settings, on: date) -> int:
+def run(settings: Settings, on: date, ticket: str | None = None,
+        on_demand: bool = False) -> int:
     client = HttpClient()
+
+    # On-demand runs post to their own channel so ad-hoc tickets don't muddle
+    # the daily feed you actually placed.
+    webhook = settings.discord_webhook
+    if on_demand and settings.discord_ondemand_webhook:
+        webhook = settings.discord_ondemand_webhook
+
+    specs = settings.tickets
+    if ticket:
+        specs = [s for s in specs if s.name.lower() == ticket.lower()]
+        if not specs:
+            log.error("no ticket named %r; have: %s", ticket,
+                      ", ".join(s.name for s in settings.tickets))
+            return 2
+
     legs, notes = collect_legs(settings, on, client)
 
     if not legs:
         # An empty slate is not a failure -- it's an off day. Report it and
         # exit clean so the run doesn't show up as broken.
         log.warning("no candidate legs found for %s", on)
-        if settings.discord_webhook and not settings.dry_run:
-            discord_out.send(settings.discord_webhook, [], on,
+        if webhook and not settings.dry_run:
+            discord_out.send(webhook, [], on,
                              notes + ["No qualifying legs on this slate."])
         return 0
 
     log.info("%d candidate legs across %d games",
              len(legs), len({l.game_id for l in legs}))
 
-    parlays = build_slate(legs, settings.tickets, on,
+    parlays = build_slate(legs, specs, on,
                           min_season_games=settings.min_season_games)
     if not parlays:
         msg = (f"Only {len({l.game_id for l in legs})} games available — not "
                f"enough legs met any ticket's criteria.")
         notes.append(msg)
         log.warning("no parlays built: %s", msg)
-        if settings.discord_webhook and not settings.dry_run:
-            discord_out.send(settings.discord_webhook, [], on, notes)
+        if webhook and not settings.dry_run:
+            discord_out.send(webhook, [], on, notes)
         return 0
 
-    # history/ is committed back to the repo so the grader can settle these
-    # tomorrow; output/ is the throwaway copy the Actions artifact picks up.
+    # An on-demand ticket is a different bet from the scheduled one, built at a
+    # different time off a different slate. Stamping the time keeps the two
+    # apart in the results channel, and the separate filename stops an ad-hoc
+    # run from overwriting the ticket the grader is waiting to settle.
+    suffix = ""
+    if on_demand:
+        stamp = datetime.now().strftime("%H:%M")
+        for parlay in parlays:
+            parlay.name = f"{parlay.name} (on-demand {stamp})"
+        slug = (ticket or "all").lower().replace(" ", "-")
+        suffix = f"-ondemand-{slug}-{datetime.now().strftime('%H%M')}"
+
+    filename = f"parlays-{on.isoformat()}{suffix}.json"
     for directory in (settings.history_dir, settings.output_dir):
         Path(directory).mkdir(parents=True, exist_ok=True)
-        discord_out.write_json(
-            parlays, str(Path(directory) / f"parlays-{on.isoformat()}.json")
-        )
+        discord_out.write_json(parlays, str(Path(directory) / filename))
 
     text = discord_out.to_console(parlays, on, notes)
     print(text)
@@ -156,11 +181,11 @@ def run(settings: Settings, on: date) -> int:
         log.info("dry run: not posting to Discord")
         return 0
 
-    if not settings.discord_webhook:
-        log.error("DISCORD_WEBHOOK_URL is not set")
+    if not webhook:
+        log.error("no webhook configured for this run")
         return 2
 
-    ok = discord_out.send(settings.discord_webhook, parlays, on, notes)
+    ok = discord_out.send(webhook, parlays, on, notes)
     return 0 if ok else 3
 
 
@@ -173,6 +198,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--dry-run", action="store_true",
                         help="print to stdout, do not post to Discord")
     parser.add_argument("--sports", help="comma-separated override, e.g. MLB,NFL")
+    parser.add_argument("--ticket",
+                        help="build only this ticket, by name (e.g. 'Safe 20')")
+    parser.add_argument("--on-demand", action="store_true",
+                        help="ad-hoc run: post to the on-demand channel and "
+                             "save under its own history file")
     parser.add_argument("-v", "--verbose", action="store_true")
     args = parser.parse_args(argv)
 
@@ -197,7 +227,7 @@ def main(argv: list[str] | None = None) -> int:
         if args.tomorrow:
             on += timedelta(days=1)
 
-    return run(settings, on)
+    return run(settings, on, ticket=args.ticket, on_demand=args.on_demand)
 
 
 if __name__ == "__main__":

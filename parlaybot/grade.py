@@ -197,14 +197,27 @@ def grade_tickets(
 # --------------------------------------------------------------------------
 
 def load_tickets(history_dir: str | Path, on: date) -> list[dict] | None:
-    path = Path(history_dir) / f"parlays-{on.isoformat()}.json"
-    if not path.exists():
+    """Every ticket saved for this slate — scheduled and on-demand alike.
+
+    On-demand runs write their own file so they can't overwrite the scheduled
+    ticket, which means grading has to gather them all rather than reading one
+    fixed name. An ad-hoc ticket you placed deserves settling too.
+    """
+    directory = Path(history_dir)
+    paths = sorted(directory.glob(f"parlays-{on.isoformat()}*.json"))
+    if not paths:
         return None
-    try:
-        return json.loads(path.read_text())
-    except (OSError, json.JSONDecodeError):
-        log.exception("could not read %s", path)
-        return None
+
+    tickets: list[dict] = []
+    for path in paths:
+        try:
+            rows = json.loads(path.read_text())
+        except (OSError, json.JSONDecodeError):
+            log.exception("could not read %s", path)
+            continue
+        if isinstance(rows, list):
+            tickets.extend(rows)
+    return tickets or None
 
 
 def save_results(history_dir: str | Path, on: date,
