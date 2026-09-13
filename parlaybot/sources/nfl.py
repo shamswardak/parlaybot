@@ -48,7 +48,7 @@ class NFLSource(SportSource):
     sport = "NFL"
     markets = MARKETS
 
-    def __init__(self, client, lookback_seasons: int = 2,
+    def __init__(self, client, lookback_seasons: int = 1,
                  lead_minutes: int = 20) -> None:
         super().__init__(client, lead_minutes)
         self.lookback_seasons = lookback_seasons
@@ -84,6 +84,35 @@ class NFLSource(SportSource):
             log.warning("NFL weekly stats unavailable for %s", season)
             return pd.DataFrame()
         return pd.read_csv(io.StringIO(body), low_memory=False)
+
+    def _current_teams(self, season: int) -> dict[str, str]:
+        """player_id -> the team he is on THIS season, from the roster release.
+
+        Without this, a player's team comes from his most recent stat line,
+        which in September is last season's team. Around 28% of producers
+        change teams each offseason, so that silently files a quarter of the
+        league into the wrong game.
+        """
+        body = self.client.first_ok(
+            [
+                f"{RELEASES}/rosters/roster_{season}.csv",
+                f"{RELEASES}/weekly_rosters/roster_weekly_{season}.csv",
+            ],
+            cache_ttl=21600,
+        )
+        if not body:
+            log.warning("NFL roster file unavailable for %s; falling back to "
+                        "last-known team", season)
+            return {}
+        roster = pd.read_csv(io.StringIO(body), low_memory=False)
+        id_col = "gsis_id" if "gsis_id" in roster.columns else "player_id"
+        if id_col not in roster.columns or "team" not in roster.columns:
+            return {}
+        # Rosters are weekly snapshots; keep each player's latest one.
+        if "week" in roster.columns:
+            roster = roster.sort_values("week").groupby(id_col).tail(1)
+        roster = roster.dropna(subset=[id_col, "team"])
+        return dict(zip(roster[id_col].astype(str), roster["team"].astype(str)))
 
     def _weekly_frame(self, season: int) -> pd.DataFrame:
         if self._weekly is not None:
@@ -169,21 +198,28 @@ class NFLSource(SportSource):
             team_to_game[m.home_team] = m
             team_to_game[m.away_team] = m
 
+        current_teams = self._current_teams(season)
         out: list[tuple[PlayerSeason, Matchup]] = []
-        active = df[df[team_col].isin(team_to_game.keys())]
+        stale_team_only = 0
 
-        for pid, group in active.groupby(id_col):
-            matchup = team_to_game.get(str(group.iloc[0][team_col]))
+        for pid, group in df.groupby(id_col):
+            pid = str(pid)
+            # Current roster is the authority. Only when the roster file is
+            # missing do we fall back to his latest stat line's team.
+            team = current_teams.get(pid) or str(group.iloc[0][team_col])
+            if current_teams and pid not in current_teams:
+                stale_team_only += 1
+            matchup = team_to_game.get(team)
             if matchup is None:
                 continue
-            logs = self._logs_from_rows(group, matchup)
+            logs = self._logs_from_rows(group, matchup, season)
             if len(logs) < 6:
                 continue
             out.append((
                 PlayerSeason(
-                    player_id=str(pid),
+                    player_id=pid,
                     name=str(group.iloc[0][name_col]),
-                    team=str(group.iloc[0][team_col]),
+                    team=team,
                     sport="NFL",
                     position=str(group.iloc[0][pos_col]) if pos_col else "",
                     logs=logs,
@@ -191,11 +227,15 @@ class NFLSource(SportSource):
                 matchup,
             ))
 
+        if stale_team_only:
+            log.info("NFL: %d players had stats but no current roster entry",
+                     stale_team_only)
+
         log.info("NFL players: %d", len(out))
         return out
 
-    def _logs_from_rows(self, group: pd.DataFrame, matchup: Matchup
-                        ) -> list[GameLogEntry]:
+    def _logs_from_rows(self, group: pd.DataFrame, matchup: Matchup,
+                        current_season: int) -> list[GameLogEntry]:
         logs: list[GameLogEntry] = []
         for _, row in group.iterrows():
             stats = {}
@@ -219,6 +259,7 @@ class NFLSource(SportSource):
                     home=False,
                     stats=stats,
                     minutes=usage or None,
+                    stale=int(row["season"]) < current_season,
                 )
             )
         return logs

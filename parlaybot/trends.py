@@ -43,6 +43,11 @@ class TrendConfig:
     # cleared this rate. Defaults are 8/8 in the last 8 plus 12/15 (0.80).
     strong_recent_games: int = 8
     strong_window_rate: float = 0.80
+    # Prior-season games are dropped outright by default. Last December's form
+    # is not this September's trend, and a sport is better sat out than priced
+    # off stale data. Set True (with stale_weight) to use it at reduced weight.
+    use_prior_season: bool = False
+    stale_weight: float = 0.5
 
 
 # --------------------------------------------------------------------------
@@ -50,11 +55,14 @@ class TrendConfig:
 # --------------------------------------------------------------------------
 
 def weighted_hit_rate(
-    values: list[float], threshold: float, decay: float
+    values: list[float], threshold: float, decay: float,
+    stale: list[bool] | None = None, stale_weight: float = 1.0
 ) -> tuple[float, float, float]:
     """Return (weighted_hits, weighted_n, raw_hit_rate) for `value >= threshold`.
 
-    `values` is newest-first, so index 0 gets full weight.
+    `values` is newest-first, so index 0 gets full weight. Games flagged stale
+    -- from an earlier season -- are scaled by `stale_weight`, so last year's
+    17 games inform the baseline without masquerading as current form.
     """
     if not values:
         return 0.0, 0.0, 0.0
@@ -63,6 +71,8 @@ def weighted_hit_rate(
     hits = 0
     for i, v in enumerate(values):
         w = decay ** i
+        if stale and i < len(stale) and stale[i]:
+            w *= stale_weight
         w_total += w
         if v >= threshold:
             w_hits += w
@@ -80,7 +90,7 @@ def shrink(
 
 
 def has_strong_trend(values: list[float], threshold: float,
-                     cfg: TrendConfig) -> bool:
+                     cfg: TrendConfig, stale: list[bool] | None = None) -> bool:
     """Perfect recent form backed by sustained form.
 
     This is the exception that buys a leg past the core price band. Both halves
@@ -90,6 +100,10 @@ def has_strong_trend(values: list[float], threshold: float,
     """
     if len(values) < cfg.strong_recent_games:
         return False
+    # The exception is about current form, so it cannot be bought with last
+    # season's games.
+    if stale and any(stale[: cfg.strong_recent_games]):
+        return False
     recent = values[: cfg.strong_recent_games]
     if not all(v >= threshold for v in recent):
         return False
@@ -97,10 +111,18 @@ def has_strong_trend(values: list[float], threshold: float,
     return window_rate >= cfg.strong_window_rate
 
 
-def current_streak(values: list[float], threshold: float) -> int:
-    """Consecutive games (newest-first) meeting the threshold."""
+def current_streak(values: list[float], threshold: float,
+                   stale: list[bool] | None = None) -> int:
+    """Consecutive games (newest-first) meeting the threshold.
+
+    A streak stops at the season boundary. Six straight games last December is
+    a fact about last season, not a live run, and the streak bonus must not
+    treat it as one.
+    """
     n = 0
-    for v in values:
+    for i, v in enumerate(values):
+        if stale and i < len(stale) and stale[i]:
+            break
         if v >= threshold:
             n += 1
         else:
@@ -239,6 +261,7 @@ def build_legs_for_player(
     price_band: tuple[float, float],
     core_band: tuple[float, float] | None = None,
     calibration=None,
+    min_games: int | None = None,
 ) -> list[Leg]:
     """Produce every viable leg for one player in one game.
 
@@ -257,15 +280,28 @@ def build_legs_for_player(
 
     for stat_key, meta in markets.items():
         all_vals = player.values(stat_key)
-        if len(all_vals) < cfg.min_games:
+        all_stale = player.stale_flags(stat_key)
+
+        # Drop prior-season games entirely unless explicitly opted in. A sport
+        # early in its season then simply has no legs, rather than legs built
+        # on last year's roster and last year's role.
+        if not cfg.use_prior_season:
+            kept = [(v, s) for v, s in zip(all_vals, all_stale) if not s]
+            all_vals = [v for v, _ in kept]
+            all_stale = [s for _, s in kept]
+
+        floor = cfg.min_games if min_games is None else min_games
+        if len(all_vals) < floor:
             continue
         window_vals = all_vals[: cfg.window]
-        if len(window_vals) < cfg.min_games:
+        window_stale = all_stale[: cfg.window]
+        if len(window_vals) < floor:
             continue
+        prior_season_only = all(window_stale) if window_stale else False
 
         for threshold in candidate_thresholds(window_vals, meta["step"]):
             w_hits, w_total, raw_rate = weighted_hit_rate(
-                window_vals, threshold, cfg.decay
+                window_vals, threshold, cfg.decay, window_stale, cfg.stale_weight
             )
             if w_total <= 0:
                 continue
@@ -274,7 +310,7 @@ def build_legs_for_player(
             prior = cfg.league_prior if prior is None else prior
             base = shrink(w_hits, w_total, prior, cfg.prior_strength)
 
-            streak = current_streak(window_vals, threshold)
+            streak = current_streak(window_vals, threshold, window_stale)
             prob, notes = adjust(
                 base,
                 streak=streak,
@@ -298,12 +334,17 @@ def build_legs_for_player(
             # light to be safe, or too heavy to be worth the payout it eats --
             # it only makes the ticket on a strong trend.
             if not (core_lo <= price <= core_hi):
-                if not has_strong_trend(window_vals, threshold, cfg):
+                if not has_strong_trend(window_vals, threshold, cfg, window_stale):
                     continue
                 side = "long" if price > core_hi else "heavy"
                 notes_extra = f"{side} price, allowed on a strong trend"
             else:
                 notes_extra = ""
+
+            # Say it out loud when there is no current-season form behind this.
+            if prior_season_only:
+                notes_extra = (notes_extra + " · " if notes_extra else "") + \
+                    "last season's form only"
 
             conf = confidence_score(
                 n_window=len(window_vals),

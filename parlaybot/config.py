@@ -18,6 +18,12 @@ class Settings:
     sports: list[str] = field(default_factory=lambda: ["MLB", "NFL", "NBA", "NHL"])
     market_hold: float = 0.06
     min_minutes_to_start: int = 20
+    # Current-season games a player needs before he can be priced. Keeps a
+    # sport out of the tickets until its season has produced real form --
+    # baseball carries the load in the meantime.
+    min_season_games: dict = field(default_factory=lambda: {
+        "MLB": 8, "NFL": 4, "NBA": 8, "NHL": 8,
+    })
     price_band: tuple[float, float] = (-1200.0, -400.0)
     core_price_band: tuple[float, float] = (-900.0, -550.0)
     parlays: list[dict] = field(default_factory=lambda: [

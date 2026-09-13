@@ -22,6 +22,10 @@ class GameLogEntry:
     home: bool
     stats: dict[str, float]
     minutes: float | None = None  # playing-time proxy; used as a volatility filter
+    # True for a game from an earlier season. Form does not carry across an
+    # offseason the way it carries across a week, so these count for less and
+    # cannot sustain a streak.
+    stale: bool = False
 
 
 @dataclass
@@ -38,6 +42,16 @@ class PlayerSeason:
     def values(self, stat: str, limit: int | None = None) -> list[float]:
         logs = self.logs if limit is None else self.logs[:limit]
         return [g.stats[stat] for g in logs if stat in g.stats]
+
+    @property
+    def current_game_count(self) -> int:
+        """Games logged in the CURRENT season — the sample that actually counts."""
+        return sum(1 for g in self.logs if not g.stale)
+
+    def stale_flags(self, stat: str, limit: int | None = None) -> list[bool]:
+        """Per-game staleness, aligned index-for-index with values()."""
+        logs = self.logs if limit is None else self.logs[:limit]
+        return [g.stale for g in logs if stat in g.stats]
 
 
 @dataclass

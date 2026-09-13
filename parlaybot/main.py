@@ -70,6 +70,9 @@ def collect_legs(settings: Settings, on: date, client: HttpClient
             notes.append(f"{sport}: player data unavailable ({exc.__class__.__name__})")
             continue
 
+        floor = settings.min_season_games.get(sport, settings.trend.min_games)
+        short_sample = sum(1 for p, _ in pairs if p.current_game_count < floor)
+
         sport_legs: list[Leg] = []
         for player, matchup in pairs:
             markets = (
@@ -90,15 +93,24 @@ def collect_legs(settings: Settings, on: date, client: HttpClient
                         price_band=settings.price_band,
                         core_band=settings.core_price_band,
                         calibration=cal,
+                        min_games=floor,
                     )
                 )
             except Exception:
                 log.exception("leg build failed for %s", player.name)
 
-        notes.append(
-            f"{sport}: {len(matchups)} games, {len(pairs)} players, "
-            f"{len(sport_legs)} candidate legs"
-        )
+        if not sport_legs and short_sample == len(pairs) and pairs:
+            # Early in a season this is the expected state, not a failure.
+            notes.append(
+                f"{sport}: {len(matchups)} games, but no player has {floor}+ games "
+                f"this season yet — sitting it out until the sample is real"
+            )
+        else:
+            note = (f"{sport}: {len(matchups)} games, {len(pairs)} players, "
+                    f"{len(sport_legs)} candidate legs")
+            if short_sample:
+                note += f" ({short_sample} skipped for <{floor} games)"
+            notes.append(note)
         all_legs.extend(sport_legs)
 
     return all_legs, notes

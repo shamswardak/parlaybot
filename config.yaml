@@ -87,3 +87,14 @@ calibration:
 
 output_dir: output        # throwaway copy, picked up as an Actions artifact
 history_dir: history      # committed back to the repo — the grader reads this
+
+# Current-season games a player needs before the bot will price him. This is
+# what keeps NFL out of the tickets in Week 1 and NBA/NHL out in late October,
+# instead of falling back on last season's form — which is a different roster,
+# a different role, and not a trend. MLB carries the slate until the others
+# have real samples.
+min_season_games:
+  MLB: 8
+  NFL: 4      # ~Week 5, since a player needs 4 games played
+  NBA: 8
+  NHL: 8
