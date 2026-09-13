@@ -150,3 +150,38 @@ def test_parlay_math_is_internally_consistent():
         p.model_probability * p.total_decimal, rel=1e-9
     )
     assert p.implied_probability == pytest.approx(1.0 / p.total_decimal, rel=1e-9)
+
+
+def test_single_game_slate_still_builds_a_ticket():
+    """One game left at 9pm should produce a playable SGP, not nothing."""
+    legs, _ = _legs(n_games=1, per_team=8)
+    p = build_parlay(legs, BuildConfig(), date.today(), n_legs=20)
+    assert p is not None
+    assert len(p.legs) >= 4
+    assert p.n_games == 1
+    assert any("one game" in n for n in p.notes), "must warn it's a same-game parlay"
+
+
+def test_single_game_ticket_respects_the_ceiling():
+    legs, _ = _legs(n_games=1, per_team=8)
+    cfg = BuildConfig(thin_slate_max_per_game=6)
+    p = build_parlay(legs, cfg, date.today(), n_legs=20)
+    assert len(p.legs) <= 6
+
+
+def test_strict_cap_still_refuses_when_configured():
+    """Setting the ceiling to the normal cap restores the old behaviour."""
+    legs, _ = _legs(n_games=1, per_team=8)
+    cfg = BuildConfig(max_legs_per_game=2, thin_slate_max_per_game=2)
+    assert build_parlay(legs, cfg, date.today(), n_legs=20) is None
+
+
+def test_healthy_slate_does_not_stretch_the_cap():
+    """The stretch must only trigger when the slate can't fill the ticket."""
+    legs, _ = _legs(n_games=13)
+    p = build_parlay(legs, BuildConfig(), date.today(), n_legs=20)
+    per_game = {}
+    for leg in p.legs:
+        per_game[leg.game_id] = per_game.get(leg.game_id, 0) + 1
+    assert max(per_game.values()) <= 2
+    assert not any("one game" in n for n in p.notes)

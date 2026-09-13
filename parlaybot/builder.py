@@ -34,6 +34,7 @@ class BuildConfig:
     max_legs: int = 20
     absolute_min_legs: int = 4       # below this a "parlay" isn't worth printing
     max_legs_per_game: int = 2       # >1 permits SGP fill
+    thin_slate_max_per_game: int = 10  # ceiling when the slate can't fill the ticket
     prefer_cross_game: bool = True
     tolerance: float = 0.12          # acceptable |log(product/target)|
     confidence_weight: float = 1.0
@@ -134,11 +135,22 @@ def select_slots(
     first_cap = 1 if cfg.prefer_cross_game else cfg.max_legs_per_game
     pass_over(first_cap, chosen, used_players, per_game)
 
-    # Slate too thin for one-per-game: allow same-game legs to fill the ticket.
+    # Slate too thin for one-per-game: allow same-game legs up to the normal cap.
     cap = first_cap
     while len(chosen) < n_legs and cap < cfg.max_legs_per_game:
         cap += 1
         pass_over(cap, chosen, used_players, per_game)
+
+    # Still can't field even a minimal ticket -- one game left, say. Stretch
+    # past the normal cap so that yields a same-game ticket rather than
+    # nothing. Deliberately gated on failing to reach absolute_min_legs: a
+    # six-game slate fills 12 legs at two per game and must NOT be turned into
+    # a heavy SGP just because 20 was asked for.
+    if len(chosen) < cfg.absolute_min_legs:
+        ceiling = max(cfg.max_legs_per_game, cfg.thin_slate_max_per_game)
+        while len(chosen) < n_legs and cap < ceiling:
+            cap += 1
+            pass_over(cap, chosen, used_players, per_game)
 
     if len(chosen) < n_legs:
         return None
@@ -256,6 +268,21 @@ def build_parlay(
         parlay.notes.append(
             f"Short slate: {len(parlay_legs)} legs, not {wanted} — only {n_games} "
             f"games available at {cfg.max_legs_per_game} leg(s) per game."
+        )
+
+    # Flag a ticket that leans heavily on one game. Books reprice correlated
+    # legs, so the multiplied payout above is an upper bound, not a quote.
+    per_game: dict[str, int] = {}
+    for leg in parlay_legs:
+        per_game[leg.game_id] = per_game.get(leg.game_id, 0) + 1
+    biggest = max(per_game.values())
+    if biggest >= 3 and biggest >= len(parlay_legs) / 2:
+        label = next(l.game_label for l in parlay_legs
+                     if per_game[l.game_id] == biggest)
+        parlay.notes.append(
+            f"{biggest} of {len(parlay_legs)} legs are in one game ({label}). "
+            f"DraftKings prices this as a same-game parlay, so the real payout "
+            f"will be well under the number above — check it before you stake."
         )
 
     shortfall = parlay.total_decimal / cfg.target_decimal

@@ -54,7 +54,13 @@ build:
   absolute_min_legs: 4    # on a thin slate, build the best ticket available
                           # down to this many legs and flag that it's short
                           # rather than refusing to build at all
-  max_legs_per_game: 2    # >1 permits same-game fill on thin slates
+  max_legs_per_game: 2    # normal cap — cross-game legs multiply honestly
+  thin_slate_max_per_game: 10
+                          # ceiling the cap stretches to when there aren't
+                          # enough games to fill the ticket. Set to 2 to keep
+                          # the strict cap and get no ticket on a one-game
+                          # slate; raise it for more legs out of fewer games.
+                          # Note books cap same-game parlays (DK ~12 legs).
   prefer_cross_game: true # fill every distinct game before doubling up
   tolerance: 0.12         # acceptable |log(actual/target)| before it stops tuning
   error_weight: 12.0      # how hard to push toward the payout target vs. confidence
