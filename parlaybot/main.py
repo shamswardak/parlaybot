@@ -71,6 +71,15 @@ def collect_legs(settings: Settings, on: date, client: HttpClient
             continue
 
         floor = settings.min_season_games.get(sport, settings.trend.min_games)
+
+        # Teams still finishing yesterday's game: their players' logs are a
+        # game behind, so any streak we quote for them may already be broken.
+        try:
+            stale = source.stale_teams(on)
+        except Exception:
+            log.exception("%s staleness check failed", sport)
+            stale = set()
+
         sport_legs: list[Leg] = []
         for player, matchup in pairs:
             markets = (
@@ -94,6 +103,7 @@ def collect_legs(settings: Settings, on: date, client: HttpClient
                         # ticket applies its own sample rule afterwards, and
                         # the Safe ticket deliberately waives it.
                         min_games=settings.trend.min_games,
+                        stale_trend=player.team in stale,
                     )
                 )
             except Exception:
@@ -103,8 +113,13 @@ def collect_legs(settings: Settings, on: date, client: HttpClient
         # price carries the risk, but not for the trend-driven ones.
         stale_legs = sum(1 for leg in sport_legs if leg.prior_season_only)
         thin = sum(1 for leg in sport_legs if leg.current_games < floor)
+        behind = sum(1 for leg in sport_legs if leg.stale_trend)
         note = (f"{sport}: {len(matchups)} games, {len(pairs)} players, "
                 f"{len(sport_legs)} candidate legs")
+        if behind:
+            note += (f" — {behind} leg(s) from {len(stale)} team(s) still "
+                     f"finishing yesterday's game, so their streaks are a game "
+                     f"behind (safe ticket only)")
         if stale_legs or thin:
             note += (f" ({stale_legs} from last season only, {thin} under "
                      f"{floor} games this season — safe ticket only)")

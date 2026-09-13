@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 
 from ..models import GameLogEntry, Matchup, PlayerSeason
 from .base import SportSource
@@ -102,6 +102,33 @@ class MLBSource(SportSource):
                  len(out), skipped)
         return out
 
+    def stale_teams(self, on: date) -> set[str]:
+        """Teams whose previous day's game is not yet final."""
+        self._load_teams()
+        yesterday = on - timedelta(days=1)
+        data = self.client.get_json(
+            f"{BASE}/schedule",
+            {"sportId": 1, "date": yesterday.isoformat()},
+            cache_ttl=900,
+            ttl_tag=f"sched-prev-{yesterday}",
+        )
+        stale: set[str] = set()
+        for day in (data or {}).get("dates", []):
+            for g in day.get("games", []):
+                state = g.get("status", {}).get("abstractGameState")
+                if state == "Final":
+                    continue
+                for side in ("home", "away"):
+                    team = g.get("teams", {}).get(side, {}).get("team", {})
+                    abbr = self._team_abbr.get(team.get("id"))
+                    if abbr:
+                        stale.add(abbr)
+        if stale:
+            log.info("MLB: %d team(s) have an unfinished %s game — their trend "
+                     "windows are a game behind: %s",
+                     len(stale), yesterday, ", ".join(sorted(stale)))
+        return stale
+
     # -- players -----------------------------------------------------------
 
     def _roster_hitters(self, team_id: int, season: int) -> list[dict]:
@@ -178,7 +205,10 @@ class MLBSource(SportSource):
         data = self.client.get_json(
             f"{BASE}/people/{player_id}/stats",
             {"stats": "gameLog", "group": group, "season": season},
-            cache_ttl=21600,
+            # One hour, not six: a six-hour-old log misses every game
+            # played since, which is exactly how a broken streak gets
+            # quoted as live.
+            cache_ttl=3600,
             ttl_tag=f"log-{player_id}-{group}-{season}",
         )
         splits = []

@@ -63,6 +63,11 @@ class TicketSpec:
     market_bands: dict = field(default_factory=dict)
     # Markets to fill from first when everything else is equal.
     preferred_markets: list = field(default_factory=list)
+    # Accept legs whose trend window is missing an unfinished game. Only
+    # safe tickets should: there the price carries the risk, whereas a
+    # trend ticket built on a streak that may already be broken is
+    # asserting something it cannot know.
+    allow_stale_trend: bool = False
 
     def band_at(self, step: int) -> tuple[float, float]:
         """The price band after `step` relaxation passes.
@@ -105,7 +110,8 @@ DEFAULT_SPECS = [
                # -900, so they get a heavier band and first call on the slots.
                market_bands={"Strikeouts": [-1600, -800],
                              "Outs Recorded": [-1600, -700]},
-               preferred_markets=["Strikeouts", "Outs Recorded"]),
+               preferred_markets=["Strikeouts", "Outs Recorded"],
+               allow_stale_trend=True),
     TicketSpec(name="Core 10", n_legs=10, price_min=-700, price_max=-450,
                sports=["MLB"], min_streak=0, require_current_season=True),
     TicketSpec(name="Trend 5", n_legs=5, price_min=-400, price_max=-150,
@@ -133,6 +139,8 @@ def eligible(
         if not (lo <= leg.est_price <= hi):
             continue
         if leg.streak < min_streak:
+            continue
+        if leg.stale_trend and not spec.allow_stale_trend:
             continue
         if spec.require_current_season:
             if leg.prior_season_only:

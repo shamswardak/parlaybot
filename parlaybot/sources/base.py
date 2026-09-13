@@ -92,6 +92,19 @@ class SportSource(ABC):
     def is_home(self, player: PlayerSeason, matchup: Matchup) -> bool:
         return player.team == matchup.home_team
 
+    def stale_teams(self, on: date) -> set[str]:
+        """Teams whose previous game hasn't finished, so their logs are behind.
+
+        Build Sunday's ticket at midnight and Saturday's late games are still
+        being played -- those results aren't in anyone's game log yet, so every
+        streak quoted for those players is one game out of date and may already
+        be broken. Knowing which teams are affected is the difference between
+        "he's on a 12-game run" and "he was, before tonight".
+
+        Sports that can answer override this; the base assumes nothing is stale.
+        """
+        return set()
+
     def actual(self, player_id: str, stat_key: str, on: date) -> float | None:
         """What the player actually recorded for `stat_key` on `on`.
 

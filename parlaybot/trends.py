@@ -267,6 +267,7 @@ def build_legs_for_player(
     core_band: tuple[float, float] | None = None,
     calibration=None,
     min_games: int | None = None,
+    stale_trend: bool = False,
 ) -> list[Leg]:
     """Produce every viable leg for one player in one game.
 
@@ -353,6 +354,9 @@ def build_legs_for_player(
             if prior_season_only:
                 notes_extra = (notes_extra + " · " if notes_extra else "") + \
                     "last season's form only"
+            if stale_trend:
+                notes_extra = (notes_extra + " · " if notes_extra else "") + \
+                    "⚠ last game not final — streak may be broken"
 
             conf = confidence_score(
                 n_window=len(window_vals),
@@ -394,6 +398,7 @@ def build_legs_for_player(
                     opponent=opponent,
                     current_games=player.current_game_count,
                     prior_season_only=prior_season_only,
+                    stale_trend=stale_trend,
                     notes=notes + ([notes_extra] if notes_extra else []),
                 )
             )

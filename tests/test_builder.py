@@ -248,3 +248,24 @@ def test_preferred_markets_are_filled_first():
         leg.market = "Strikeouts" if i % 2 else "Hits"
     ranked = best_per_player(legs, (-1400, -150), "safe", ["Strikeouts"])
     assert ranked[0].market == "Strikeouts", "preferred markets go first"
+
+
+def test_stale_trend_legs_are_kept_off_trend_tickets():
+    """A streak that may already be broken can't carry a trend ticket."""
+    legs, _ = _legs(6)
+    for leg in legs:
+        leg.stale_trend = True
+    trend = TicketSpec(name="x", n_legs=5, price_min=-1400, price_max=-150)
+    safe = TicketSpec(name="x", n_legs=5, price_min=-1400, price_max=-150,
+                      allow_stale_trend=True)
+    assert eligible(legs, trend, 0, 0, None) == []
+    assert eligible(legs, safe, 0, 0, None) != [], (
+        "the safe ticket leans on price, not on the streak, so it may accept "
+        "a leg whose last game is unresolved"
+    )
+
+
+def test_default_safe_ticket_tolerates_stale_trends_and_others_do_not():
+    assert DEFAULT_SPECS[0].allow_stale_trend is True
+    assert DEFAULT_SPECS[1].allow_stale_trend is False
+    assert DEFAULT_SPECS[2].allow_stale_trend is False

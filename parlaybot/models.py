@@ -93,6 +93,9 @@ class Leg:
     opponent: str = ""     # kept for future opponent-strength modelling
     current_games: int = 0     # games played THIS season
     prior_season_only: bool = False
+    # True when the player's team has an unfinished game since his last
+    # logged one, so this streak may already be broken.
+    stale_trend: bool = False
     notes: list[str] = field(default_factory=list)
 
     @property
@@ -126,6 +129,7 @@ class Leg:
             "opponent": self.opponent,
             "current_games": self.current_games,
             "prior_season_only": self.prior_season_only,
+            "stale_trend": self.stale_trend,
             "confidence": round(self.confidence, 3),
             "notes": self.notes,
         }
