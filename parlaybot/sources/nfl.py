@@ -48,7 +48,13 @@ class NFLSource(SportSource):
     sport = "NFL"
     markets = MARKETS
 
-    def __init__(self, client, lookback_seasons: int = 1,
+    # Two seasons, not one. In September the current season has a game or two
+    # on file and `players()` drops anyone under 6 logs, so a one-season
+    # lookback yields literally zero NFL players until about Week 6. Last
+    # season's games load tagged prior_season_only, which only the Safe ticket
+    # accepts outright; teams are resolved from the CURRENT roster file, so old
+    # logs can't put a player on a team he has since left.
+    def __init__(self, client, lookback_seasons: int = 2,
                  lead_minutes: int = 20) -> None:
         super().__init__(client, lead_minutes)
         self.lookback_seasons = lookback_seasons
