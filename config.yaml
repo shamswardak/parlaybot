@@ -21,10 +21,16 @@ market_hold: 0.06
 # legs may be half-decided already. Raise it if you want more time to shop.
 min_minutes_to_start: 20
 
-# Only consider legs whose ESTIMATED price lands in this band, in American odds.
-# Centred on the -650 target. Widening it gives the builder more room to hit the
-# payout target; narrowing it makes every leg look more alike.
+# Hard limits: a leg priced outside this is never considered, at any trend.
 price_band: [-1200, -400]
+
+# Free-entry band. Legs priced inside this stand on their own merits. Legs
+# outside it but still inside price_band need a STRONG TREND to make a ticket:
+#   - too light (-400 to -550): pays well but likeliest to lose the ticket
+#   - too heavy (-900 to -1200): near-certain but eats payout for little safety
+# Strong trend is defined under trend.strong_* below. Set this equal to
+# price_band to turn the gate off entirely.
+core_price_band: [-900, -550]
 
 # One entry per ticket generated each day. Tickets do not share players.
 parlays:
@@ -46,6 +52,8 @@ trend:
   road_penalty: 0.04
   volatility_penalty: 0.30
   min_confidence: 0.45    # legs below this are dropped entirely
+  strong_recent_games: 8  # the "strong trend" exception: all 8 of the last 8...
+  strong_window_rate: 0.80  # ...AND 80% of the 15-game window (12/15)
 
 build:
   target_american: 1500   # +1500 ≈ 16x your stake

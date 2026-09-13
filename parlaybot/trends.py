@@ -38,6 +38,11 @@ class TrendConfig:
     road_penalty: float = 0.04       # log-odds hit for road games
     volatility_penalty: float = 0.30 # scales the playing-time-variance penalty
     min_confidence: float = 0.45
+    # The "strong trend" exception that lets a leg outside the core price band
+    # onto a ticket: every one of the last N games hit, AND the wider window
+    # cleared this rate. Defaults are 8/8 in the last 8 plus 12/15 (0.80).
+    strong_recent_games: int = 8
+    strong_window_rate: float = 0.80
 
 
 # --------------------------------------------------------------------------
@@ -72,6 +77,24 @@ def shrink(
     a = prior_strength * prior_prob
     b = prior_strength * (1.0 - prior_prob)
     return (w_hits + a) / (w_total + a + b)
+
+
+def has_strong_trend(values: list[float], threshold: float,
+                     cfg: TrendConfig) -> bool:
+    """Perfect recent form backed by sustained form.
+
+    This is the exception that buys a leg past the core price band. Both halves
+    matter: the last-N-games test catches current form, and the window rate
+    stops a player who went cold for a month and has just strung together a
+    good week from qualifying on that week alone.
+    """
+    if len(values) < cfg.strong_recent_games:
+        return False
+    recent = values[: cfg.strong_recent_games]
+    if not all(v >= threshold for v in recent):
+        return False
+    window_rate = sum(1 for v in values if v >= threshold) / len(values)
+    return window_rate >= cfg.strong_window_rate
 
 
 def current_streak(values: list[float], threshold: float) -> int:
@@ -214,6 +237,7 @@ def build_legs_for_player(
     cfg: TrendConfig,
     hold: float,
     price_band: tuple[float, float],
+    core_band: tuple[float, float] | None = None,
     calibration=None,
 ) -> list[Leg]:
     """Produce every viable leg for one player in one game.
@@ -226,6 +250,10 @@ def build_legs_for_player(
     volatility = playing_time_volatility(player.logs, cfg.window)
 
     band_lo, band_hi = min(price_band), max(price_band)
+    # No core band configured means every price inside price_band is free entry.
+    core_lo, core_hi = (
+        (min(core_band), max(core_band)) if core_band else (band_lo, band_hi)
+    )
 
     for stat_key, meta in markets.items():
         all_vals = player.values(stat_key)
@@ -266,6 +294,17 @@ def build_legs_for_player(
             if not (band_lo <= price <= band_hi):
                 continue
 
+            # Inside the core band a leg stands on its own. Outside it -- too
+            # light to be safe, or too heavy to be worth the payout it eats --
+            # it only makes the ticket on a strong trend.
+            if not (core_lo <= price <= core_hi):
+                if not has_strong_trend(window_vals, threshold, cfg):
+                    continue
+                side = "long" if price > core_hi else "heavy"
+                notes_extra = f"{side} price, allowed on a strong trend"
+            else:
+                notes_extra = ""
+
             conf = confidence_score(
                 n_window=len(window_vals),
                 streak=streak,
@@ -303,7 +342,7 @@ def build_legs_for_player(
                     streak=streak,
                     window_record=record,
                     confidence=conf,
-                    notes=notes,
+                    notes=notes + ([notes_extra] if notes_extra else []),
                 )
             )
 

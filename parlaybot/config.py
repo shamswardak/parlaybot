@@ -19,6 +19,7 @@ class Settings:
     market_hold: float = 0.06
     min_minutes_to_start: int = 20
     price_band: tuple[float, float] = (-1200.0, -400.0)
+    core_price_band: tuple[float, float] = (-900.0, -550.0)
     parlays: list[dict] = field(default_factory=lambda: [
         {"name": "Max Trend", "n_legs": 20},
         {"name": "Balanced", "n_legs": 18},
@@ -46,11 +47,13 @@ class Settings:
         calib = CalibrationConfig(**(raw.pop("calibration", None) or {}))
 
         band = raw.pop("price_band", None)
+        core = raw.pop("core_price_band", None)
         settings = cls(
             trend=trend,
             build=build,
             calibration=calib,
             price_band=tuple(band) if band else cls.price_band,
+            core_price_band=tuple(core) if core else cls.core_price_band,
             **{k: v for k, v in raw.items() if k in cls.__annotations__},
         )
 

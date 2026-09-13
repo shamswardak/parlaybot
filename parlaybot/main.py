@@ -79,6 +79,7 @@ def collect_legs(settings: Settings, on: date, client: HttpClient
                         cfg=settings.trend,
                         hold=settings.market_hold,
                         price_band=settings.price_band,
+                        core_band=settings.core_price_band,
                         calibration=cal,
                     )
                 )

@@ -105,6 +105,27 @@ def _leg_lines(parlay: Parlay) -> str:
 def build_embeds(parlays: list[Parlay], slate: date, notes: list[str]) -> list[dict]:
     embeds: list[dict] = []
 
+    # An empty slate is a normal outcome -- a late run, an off day, everything
+    # already under way. Say so in plain words instead of posting a bare header
+    # and leaving the reader to wonder whether the bot broke.
+    if not parlays:
+        return [{
+            "title": "No tickets today",
+            "description": (
+                "Nothing on this slate could be built into a ticket. The run "
+                "details below say why — most often every game has already "
+                "started, or too few remain to fill the leg count.\n\n"
+                "Games already under way are skipped on purpose: their pregame "
+                "prices are gone and some legs are part-decided."
+            ),
+            "color": 0x95A5A6,
+            "fields": [{
+                "name": "Run details",
+                "value": "\n".join(f"• {n}" for n in notes[:12]) or "No details.",
+                "inline": False,
+            }],
+        }]
+
     for parlay in parlays:
         desc = _leg_lines(parlay)
         if len(desc) > MAX_DESCRIPTION:

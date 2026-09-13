@@ -86,6 +86,7 @@ def test_thin_slate_builds_the_best_available_ticket():
     assert len(p.legs) >= cfg.absolute_min_legs
     assert p.notes, "a short ticket must say that it is short"
     assert "Short slate" in p.notes[0]
+    assert "qualifying player" in p.notes[0]
 
 
 def test_thin_slate_still_pushes_toward_the_payout_target():
