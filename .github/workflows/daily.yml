@@ -2,6 +2,8 @@ name: Daily parlays
 
 on:
   schedule:
+    # 14:00 UTC = 10:00 ET. Grades yesterday first, then builds today's tickets
+    # so the build picks up the freshly refitted calibration.
     - cron: "0 14 * * *"
   workflow_dispatch:
     inputs:
@@ -15,10 +17,18 @@ on:
         description: "Print only, do not post to Discord"
         type: boolean
         default: false
+      skip_grade:
+        description: "Skip grading, just build today's tickets"
+        type: boolean
+        default: false
 
 concurrency:
   group: daily-parlays
   cancel-in-progress: false
+
+# Needed so the run can commit history/ back to the repo.
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -43,6 +53,21 @@ jobs:
           restore-keys: |
             parlaybot-cache-
 
+      # Grade first: the build below reads the calibration this step refits.
+      # continue-on-error so a grading problem never blocks today's tickets.
+      - name: Grade previous slates
+        if: ${{ github.event.inputs.skip_grade != 'true' }}
+        continue-on-error: true
+        env:
+          DISCORD_RESULTS_WEBHOOK_URL: ${{ secrets.DISCORD_RESULTS_WEBHOOK_URL }}
+          TZ: America/New_York
+        run: |
+          ARGS=""
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            ARGS="--dry-run"
+          fi
+          python -m parlaybot.grade_main $ARGS
+
       - name: Build and send
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
@@ -57,3 +82,28 @@ jobs:
             ARGS="$ARGS --dry-run"
           fi
           python -m parlaybot.main $ARGS
+
+      # history/ is the permanent record: today's tickets for tomorrow's
+      # grader, every settled leg, and the calibration fitted from them.
+      - name: Commit history
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        run: |
+          git config user.name "parlaybot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add history/
+          if git diff --staged --quiet; then
+            echo "nothing new to record"
+          else
+            git commit -m "history: $(date -u +%Y-%m-%d)"
+            git pull --rebase --autostash origin ${{ github.ref_name }} || true
+            git push
+          fi
+
+      - name: Upload ticket JSON
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: parlays
+          path: output/*.json
+          if-no-files-found: ignore
+          retention-days: 30
