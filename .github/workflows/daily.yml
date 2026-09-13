@@ -1,0 +1,59 @@
+name: Daily parlays
+
+on:
+  schedule:
+    - cron: "0 14 * * *"
+  workflow_dispatch:
+    inputs:
+      sports:
+        description: "Comma-separated sports override (e.g. MLB,NFL)"
+        required: false
+      date:
+        description: "Slate date YYYY-MM-DD (defaults to today ET)"
+        required: false
+      dry_run:
+        description: "Print only, do not post to Discord"
+        type: boolean
+        default: false
+
+concurrency:
+  group: daily-parlays
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: Restore data cache
+        uses: actions/cache@v4
+        with:
+          path: .cache
+          key: parlaybot-cache-${{ github.run_id }}
+          restore-keys: |
+            parlaybot-cache-
+
+      - name: Build and send
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          PARLAYBOT_SPORTS: ${{ github.event.inputs.sports }}
+          TZ: America/New_York
+        run: |
+          ARGS=""
+          if [ -n "${{ github.event.inputs.date }}" ]; then
+            ARGS="$ARGS --date ${{ github.event.inputs.date }}"
+          fi
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            ARGS="$ARGS --dry-run"
+          fi
+          python -m parlaybot.main $ARGS
