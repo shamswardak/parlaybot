@@ -21,25 +21,46 @@ market_hold: 0.06
 # legs may be half-decided already. Raise it if you want more time to shop.
 min_minutes_to_start: 20
 
-# Hard limits: a leg priced outside this is never considered, at any trend.
-price_band: [-1200, -400]
+# Hard outer limit. No leg outside this is ever considered, whatever ticket
+# it might land on. Wide enough to cover every ticket band below.
+price_band: [-1400, -150]
 
-# Free-entry band. Legs priced inside this stand on their own merits. Legs
-# outside it but still inside price_band need a STRONG TREND to make a ticket:
-#   - too light (-400 to -550): pays well but likeliest to lose the ticket
-#   - too heavy (-900 to -1200): near-certain but eats payout for little safety
-# Strong trend is defined under trend.strong_* below. Set this equal to
-# price_band to turn the gate off entirely.
-core_price_band: [-900, -550]
+# The three tickets built each day. A ticket is correct when every leg meets
+# its criteria — there is no payout target. If the slate can't fill one, the
+# criteria loosen a step at a time (band widens by ~2% implied probability per
+# step, streak requirement drops by 1) and the ticket says it was loosened.
+#
+#   price_min / price_max   the band, in American odds
+#   sports                  omit for every enabled sport
+#   min_streak              consecutive games the player must have hit it
+#   require_current_season  false lets last season's form through, for tickets
+#                           where the price itself is the safety
+tickets:
+  - name: "Safe 20"
+    n_legs: 20            # DraftKings caps a parlay at 20 legs (FanDuel 25)
+    price_min: -1400
+    price_max: -800       # ~89% implied and heavier
+    min_streak: 0
+    require_current_season: false   # near-certain lines hold up in Week 1 too
+    max_legs_per_game: 2
 
-# One entry per ticket generated each day. Tickets do not share players.
-parlays:
-  - name: "Max Trend"
-    n_legs: 20
-  - name: "Balanced"
-    n_legs: 18
-  - name: "Lean"
-    n_legs: 15
+  - name: "Core 10"
+    n_legs: 10
+    price_min: -700
+    price_max: -450
+    sports: ["MLB"]       # add NFL/NBA/NHL once they clear min_season_games
+    min_streak: 0
+    require_current_season: true
+    max_legs_per_game: 2
+
+  - name: "Trend 5"
+    n_legs: 5
+    price_min: -400
+    price_max: -150
+    sports: ["MLB"]
+    min_streak: 5         # the whole point of this ticket; relaxes to 4, then 3
+    require_current_season: true
+    max_legs_per_game: 1
 
 trend:
   window: 15              # rolling trend window, in games
@@ -52,27 +73,9 @@ trend:
   road_penalty: 0.04
   volatility_penalty: 0.30
   min_confidence: 0.45    # legs below this are dropped entirely
+  use_prior_season: true   # generated and tagged; only the Safe ticket accepts them
   strong_recent_games: 8  # the "strong trend" exception: all 8 of the last 8...
   strong_window_rate: 0.80  # ...AND 80% of the 15-game window (12/15)
-
-build:
-  target_american: 1500   # +1500 ≈ 16x your stake
-  min_legs: 15            # preferred floor, NOT a hard wall
-  max_legs: 20
-  absolute_min_legs: 4    # on a thin slate, build the best ticket available
-                          # down to this many legs and flag that it's short
-                          # rather than refusing to build at all
-  max_legs_per_game: 2    # normal cap — cross-game legs multiply honestly
-  thin_slate_max_per_game: 10
-                          # ceiling the cap stretches to when there aren't
-                          # enough games to fill the ticket. Set to 2 to keep
-                          # the strict cap and get no ticket on a one-game
-                          # slate; raise it for more legs out of fewer games.
-                          # Note books cap same-game parlays (DK ~12 legs).
-  prefer_cross_game: true # fill every distinct game before doubling up
-  tolerance: 0.12         # acceptable |log(actual/target)| before it stops tuning
-  error_weight: 12.0      # how hard to push toward the payout target vs. confidence
-  max_iterations: 400
 
 # Feed graded results back into the model. The grader writes history/legs.jsonl
 # and history/calibration.json; the next build reads the calibration and nudges

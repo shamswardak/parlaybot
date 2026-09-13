@@ -71,8 +71,6 @@ def collect_legs(settings: Settings, on: date, client: HttpClient
             continue
 
         floor = settings.min_season_games.get(sport, settings.trend.min_games)
-        short_sample = sum(1 for p, _ in pairs if p.current_game_count < floor)
-
         sport_legs: list[Leg] = []
         for player, matchup in pairs:
             markets = (
@@ -91,26 +89,26 @@ def collect_legs(settings: Settings, on: date, client: HttpClient
                         cfg=settings.trend,
                         hold=settings.market_hold,
                         price_band=settings.price_band,
-                        core_band=settings.core_price_band,
                         calibration=cal,
-                        min_games=floor,
+                        # Generate everything the outer band allows; each
+                        # ticket applies its own sample rule afterwards, and
+                        # the Safe ticket deliberately waives it.
+                        min_games=settings.trend.min_games,
                     )
                 )
             except Exception:
                 log.exception("leg build failed for %s", player.name)
 
-        if not sport_legs and short_sample == len(pairs) and pairs:
-            # Early in a season this is the expected state, not a failure.
-            notes.append(
-                f"{sport}: {len(matchups)} games, but no player has {floor}+ games "
-                f"this season yet — sitting it out until the sample is real"
-            )
-        else:
-            note = (f"{sport}: {len(matchups)} games, {len(pairs)} players, "
-                    f"{len(sport_legs)} candidate legs")
-            if short_sample:
-                note += f" ({short_sample} skipped for <{floor} games)"
-            notes.append(note)
+        # A leg built only on last season counts for the Safe ticket, where the
+        # price carries the risk, but not for the trend-driven ones.
+        stale_legs = sum(1 for leg in sport_legs if leg.prior_season_only)
+        thin = sum(1 for leg in sport_legs if leg.current_games < floor)
+        note = (f"{sport}: {len(matchups)} games, {len(pairs)} players, "
+                f"{len(sport_legs)} candidate legs")
+        if stale_legs or thin:
+            note += (f" ({stale_legs} from last season only, {thin} under "
+                     f"{floor} games this season — safe ticket only)")
+        notes.append(note)
         all_legs.extend(sport_legs)
 
     return all_legs, notes
@@ -132,10 +130,11 @@ def run(settings: Settings, on: date) -> int:
     log.info("%d candidate legs across %d games",
              len(legs), len({l.game_id for l in legs}))
 
-    parlays = build_slate(legs, settings.build, on, profiles=settings.parlays)
+    parlays = build_slate(legs, settings.tickets, on,
+                          min_season_games=settings.min_season_games)
     if not parlays:
-        msg = (f"Only {len({l.game_id for l in legs})} games available — not enough "
-               f"for even a {settings.build.absolute_min_legs}-leg ticket.")
+        msg = (f"Only {len({l.game_id for l in legs})} games available — not "
+               f"enough legs met any ticket's criteria.")
         notes.append(msg)
         log.warning("no parlays built: %s", msg)
         if settings.discord_webhook and not settings.dry_run:

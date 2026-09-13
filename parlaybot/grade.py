@@ -251,6 +251,14 @@ def append_graded_legs(history_dir: str | Path, on: date,
                 fh.write(json.dumps({
                     "date": on.isoformat(),
                     "sport": r.leg.get("sport"),
+                    # Recorded now so opponent-strength modelling has history to
+                    # work with when we build it -- "missed because he drew a
+                    # team that defends the three well" needs the opponent on
+                    # every settled leg, going back as far as possible.
+                    "opponent": r.leg.get("opponent", ""),
+                    "game": r.leg.get("game"),
+                    "team": r.leg.get("team"),
+                    "actual": r.actual,
                     "player_id": str(r.leg.get("player_id", "")),
                     "player": r.leg.get("player"),
                     "stat_key": r.leg.get("stat_key"),

@@ -79,12 +79,13 @@ def chunk_embeds(embeds: list[dict]) -> list[list[dict]]:
 
 
 def _color(parlay: Parlay) -> int:
-    ev = parlay.expected_value
-    if ev >= 1.05:
-        return COLOR_GOOD
-    if ev >= 0.95:
+    """Green when the ticket met its criteria as written, amber when the
+    criteria had to be loosened, red when it came up short of its leg count."""
+    if any("not" in n and "legs" in n for n in parlay.notes):
+        return COLOR_BAD
+    if parlay.notes:
         return COLOR_WARN
-    return COLOR_BAD
+    return COLOR_GOOD
 
 
 def _leg_lines(parlay: Parlay) -> str:
@@ -140,14 +141,12 @@ def build_embeds(parlays: list[Parlay], slate: date, notes: list[str]) -> list[d
                 f"{len(parlay.legs)} legs · {parlay.n_games} games", "inline": True},
             {"name": "$100 returns", "value":
                 f"${parlay.total_decimal * 100:,.0f}", "inline": True},
+            {"name": "Avg leg", "value":
+                format_american(parlay.average_leg_price), "inline": True},
             {"name": "Model hit %", "value":
-                f"{parlay.model_probability * 100:.2f}%", "inline": True},
-            {"name": "Break-even %", "value":
-                f"{parlay.implied_probability * 100:.2f}%", "inline": True},
-            {"name": "Vig drag", "value":
-                f"{parlay.expected_value:.2f}x per $1", "inline": True},
+                f"{parlay.model_probability * 100:.1f}%", "inline": True},
             {"name": "1-in-N", "value":
-                f"~1 hit per {1 / max(parlay.model_probability, 1e-9):,.0f} tickets",
+                f"~1 in {1 / max(parlay.model_probability, 1e-9):,.0f}",
                 "inline": True},
         ]
         if parlay.notes:
@@ -156,7 +155,9 @@ def build_embeds(parlays: list[Parlay], slate: date, notes: list[str]) -> list[d
                 "value": "\n".join(parlay.notes)[:1000],
                 "inline": False,
             })
-        if sgp_count:
+        # Skip when a note already spells out the same-game problem in detail.
+        already_warned = any("in one game" in n for n in parlay.notes)
+        if sgp_count and not already_warned:
             fields.append({
                 "name": "⚠️ Same-game legs",
                 "value": (f"{sgp_count} legs share a game. The book will shorten "
@@ -170,29 +171,10 @@ def build_embeds(parlays: list[Parlay], slate: date, notes: list[str]) -> list[d
             "color": _color(parlay),
             "fields": fields,
             "footer": {"text": (
-                "Prices are model estimates, not quotes — verify every leg in the "
-                "app. 'Vig drag' is what the ticket returns if the model is exactly "
-                "right and the book charges its usual hold; you only beat it on legs "
-                "where the posted price is LONGER than the estimate. "
-                "Run price_check.py with the prices you actually get."
+                "Prices are model estimates, not quotes — check every leg in the "
+                "app before you stake. Run price_check.py with the prices you "
+                "actually get to see how the ticket really priced."
             )},
-        })
-
-        # Its own embed: a fenced block renders with a copy button on mobile,
-        # and 20 legs would blow past a field's 1024-character cap.
-        slip = playbook_line(parlay)
-        if len(slip) > MAX_DESCRIPTION - 200:
-            slip = slip[: MAX_DESCRIPTION - 220] + " …"
-        embeds.append({
-            "title": f"📋 {parlay.name} — copy into a slip builder",
-            "description": (
-                f"```\n{slip}\n```\n"
-                "Paste into [Playbook](https://playbookbot.com/) "
-                "to get a prefilled DraftKings/FanDuel slip. "
-                "**Check every price before you submit** — the odds above are "
-                "estimates, not quotes."
-            ),
-            "color": 0x7289DA,
         })
 
     if notes:
@@ -205,6 +187,27 @@ def build_embeds(parlays: list[Parlay], slate: date, notes: list[str]) -> list[d
     return embeds
 
 
+def slip_messages(parlays: list[Parlay]) -> list[dict]:
+    """One plain message per ticket carrying nothing but the slip list.
+
+    Discord mobile can't select text inside an embed -- which is why the old
+    fenced code block was uncopyable on a phone. Long-pressing a MESSAGE does
+    offer "Copy Text", so the list goes out as its own message with no heading
+    and no commentary: copy it and you have exactly the list, nothing to trim.
+    """
+    out: list[dict] = []
+    for parlay in parlays:
+        out.append({
+            "content": f"**{parlay.name}** — slip list is the next message:",
+            "allowed_mentions": {"parse": []},
+        })
+        out.append({
+            "content": playbook_line(parlay)[:1900],  # Discord caps content at 2000
+            "allowed_mentions": {"parse": []},
+        })
+    return out
+
+
 def send(webhook: str, parlays: list[Parlay], slate: date,
          notes: list[str] | None = None) -> bool:
     notes = notes or []
@@ -214,20 +217,31 @@ def send(webhook: str, parlays: list[Parlay], slate: date,
 
     header = f"**Trend Parlays — {slate.strftime('%a %b %d, %Y')}**"
     ok = True
-    for i, chunk in enumerate(chunk_embeds(embeds)):
-        payload = {
-            "content": header if i == 0 else "",
-            "embeds": chunk,
-            "allowed_mentions": {"parse": []},
-        }
+
+    def post(payload: dict) -> bool:
         try:
             resp = requests.post(webhook, json=payload, timeout=20)
             if resp.status_code >= 300:
-                log.error("Discord returned %s: %s", resp.status_code, resp.text[:300])
-                ok = False
+                log.error("Discord returned %s: %s", resp.status_code,
+                          resp.text[:300])
+                return False
         except requests.RequestException as exc:
             log.error("Discord post failed: %s", exc)
+            return False
+        return True
+
+    for i, chunk in enumerate(chunk_embeds(embeds)):
+        if not post({
+            "content": header if i == 0 else "",
+            "embeds": chunk,
+            "allowed_mentions": {"parse": []},
+        }):
             ok = False
+
+    for payload in slip_messages(parlays):
+        if not post(payload):
+            ok = False
+
     return ok
 
 
@@ -241,8 +255,9 @@ def to_console(parlays: list[Parlay], slate: date, notes: list[str]) -> str:
             out.append(f"    ! {note}")
         out.append(
             f"    Est payout {format_american(p.total_american)} "
-            f"({p.total_decimal:.2f}x) | model {p.model_probability*100:.2f}% | "
-            f"break-even {p.implied_probability*100:.2f}% | EV {p.expected_value:.2f}x"
+            f"({p.total_decimal:.2f}x) | avg leg "
+            f"{format_american(p.average_leg_price)} | "
+            f"model {p.model_probability*100:.1f}%"
         )
         for i, leg in enumerate(p.legs, 1):
             out.append(

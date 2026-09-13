@@ -1,296 +1,226 @@
-"""Parlay assembly.
+"""Ticket assembly from per-ticket criteria.
 
-Given a pool of candidate legs, build tickets that land near a target payout
-using a fixed leg count, preferring one leg per game and falling back to
-same-game legs only when the slate is too thin.
+There is no payout target. A ticket is correct when every leg on it meets that
+ticket's criteria -- a price range, optionally a streak requirement, optionally
+a restriction on which sports and how much current-season sample a leg needs.
+Whatever the legs multiply out to is the result, not the goal.
 
-The search is a two-stage affair:
+Three tickets by default, each a different bet:
 
-1.  Slot selection -- pick which (player, market) ladders go on the ticket,
-    ranked by confidence, subject to one leg per player and a cap per game.
-2.  Rung selection -- hill-climb the threshold chosen on each ladder so the
-    product of the leg prices converges on the target payout, trading as little
-    confidence as possible to get there.
+  Safe    20 legs around -900. The price is the safety, so this one does not
+          require current-season sample -- a near-certain low threshold holds
+          up in Week 1 as well as Week 12. Trends break ties, nothing more.
+  Core    10 legs at -500/-650, current-season form required.
+  Trend    5 legs at -150/-400, and here the streak is the point: a player has
+          to have done it several games running to qualify.
 
-Stage 2 is what makes a "target +1500" instruction meaningful without a live
-odds feed: the ladders give the builder something to tune.
+When a slate cannot fill a ticket, the criteria loosen a step at a time -- the
+price band widens, the streak requirement drops -- and the ticket says which
+pass produced it. A relaxed ticket is better than no ticket, as long as it is
+honest about being relaxed.
 """
 
 from __future__ import annotations
 
-import math
+import logging
 from collections import defaultdict
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import date
 
 from .models import Leg, Parlay
-from .odds import format_american
+from .odds import american_to_prob, format_american, prob_to_american
+
+log = logging.getLogger(__name__)
 
 
 @dataclass
-class BuildConfig:
-    target_american: float = 1500.0
-    min_legs: int = 15               # preferred floor, not a hard wall
-    max_legs: int = 20
-    absolute_min_legs: int = 4       # below this a "parlay" isn't worth printing
-    max_legs_per_game: int = 2       # >1 permits SGP fill
-    thin_slate_max_per_game: int = 10  # ceiling when the slate can't fill the ticket
-    prefer_cross_game: bool = True
-    tolerance: float = 0.12          # acceptable |log(product/target)|
-    confidence_weight: float = 1.0
-    error_weight: float = 12.0
-    max_iterations: int = 400
+class TicketSpec:
+    name: str
+    n_legs: int
+    price_min: float              # most negative edge, e.g. -1200
+    price_max: float              # least negative edge, e.g. -800
+    sports: list[str] | None = None        # None = every enabled sport
+    min_streak: int = 0
+    require_current_season: bool = True
+    max_legs_per_game: int = 2
+    absolute_min_legs: int = 3
+    relax_steps: int = 5
+    relax_prob: float = 0.02      # band widening per pass, in implied probability
+    relax_streak: int = 1
+    # Steps spent easing the streak requirement BEFORE the price band moves.
+    # The band is what gives a ticket its identity -- a 5-leg trend ticket that
+    # widens its way up to -900 has quietly become the safe ticket -- so the
+    # streak gives first.
+    streak_relax_steps: int = 2
 
-    @property
-    def target_decimal(self) -> float:
-        a = self.target_american
-        return 1.0 + (a / 100.0 if a > 0 else 100.0 / abs(a))
+    def band_at(self, step: int) -> tuple[float, float]:
+        """The price band after `step` relaxation passes.
 
-
-# --------------------------------------------------------------------------
-# Slots
-# --------------------------------------------------------------------------
-
-@dataclass
-class Slot:
-    """One (player, market) ladder: the rungs are alternate thresholds."""
-
-    key: tuple[str, str]
-    game_id: str
-    player: str
-    rungs: list[Leg]      # sorted by threshold ascending (price gets longer)
-    chosen: int = 0
-
-    @property
-    def leg(self) -> Leg:
-        return self.rungs[self.chosen]
-
-    @property
-    def best_confidence(self) -> float:
-        return max(r.confidence for r in self.rungs)
-
-    def reach_score(self, per_leg_log: float, error_weight: float) -> float:
-        """Best confidence this ladder can offer *at a usable price*.
-
-        Ranking slots on confidence alone fills the ticket with the surest legs,
-        which are also the shortest-priced ones -- and then no amount of tuning
-        can stretch the ticket to the payout target. Scoring each ladder by the
-        confidence it can deliver near the required per-leg price keeps slot
-        selection and price tuning pulling in the same direction.
+        Widened in probability space rather than American points: -900 to -1000
+        is a far smaller move than -200 to -300, so widening by a fixed number
+        of points would loosen the long end drastically and the short end
+        barely at all.
         """
-        return max(
-            r.confidence - error_weight * abs(math.log(r.decimal) - per_leg_log)
-            for r in self.rungs
-        )
+        widen = max(0, step - self._streak_budget)
+        lo_p = american_to_prob(self.price_min) + widen * self.relax_prob
+        hi_p = american_to_prob(self.price_max) - widen * self.relax_prob
+        lo_p = min(lo_p, 0.985)
+        hi_p = max(hi_p, 0.10)
+        # Returned as (most negative, least negative), matching price_min/max.
+        return prob_to_american(lo_p), prob_to_american(hi_p)
+
+    @property
+    def _streak_budget(self) -> int:
+        """Relaxation steps reserved for the streak, zero when none is required."""
+        return self.streak_relax_steps if self.min_streak else 0
+
+    def streak_at(self, step: int) -> int:
+        used = min(step, self._streak_budget)
+        return max(0, self.min_streak - used * self.relax_streak)
 
 
-def build_slots(legs: list[Leg]) -> list[Slot]:
-    grouped: dict[tuple[str, str], list[Leg]] = defaultdict(list)
+DEFAULT_SPECS = [
+    TicketSpec(name="Safe 20", n_legs=20, price_min=-1400, price_max=-800,
+               sports=None, min_streak=0, require_current_season=False),
+    TicketSpec(name="Core 10", n_legs=10, price_min=-700, price_max=-450,
+               sports=["MLB"], min_streak=0, require_current_season=True),
+    TicketSpec(name="Trend 5", n_legs=5, price_min=-400, price_max=-150,
+               sports=["MLB"], min_streak=5, require_current_season=True),
+]
+
+
+# --------------------------------------------------------------------------
+# Filtering and selection
+# --------------------------------------------------------------------------
+
+def eligible(
+    legs: list[Leg],
+    spec: TicketSpec,
+    band: tuple[float, float],
+    min_streak: int,
+    min_season_games: dict[str, int] | None,
+) -> list[Leg]:
+    lo, hi = min(band), max(band)
+    out = []
     for leg in legs:
-        grouped[(leg.player, leg.stat_key)].append(leg)
+        if spec.sports and leg.sport not in spec.sports:
+            continue
+        if not (lo <= leg.est_price <= hi):
+            continue
+        if leg.streak < min_streak:
+            continue
+        if spec.require_current_season:
+            if leg.prior_season_only:
+                continue
+            floor = (min_season_games or {}).get(leg.sport, 0)
+            if leg.current_games < floor:
+                continue
+        out.append(leg)
+    return out
 
-    slots: list[Slot] = []
-    for key, rungs in grouped.items():
-        rungs = sorted(rungs, key=lambda l: l.threshold)
-        slots.append(
-            Slot(key=key, game_id=rungs[0].game_id, player=rungs[0].player, rungs=rungs)
-        )
-    return slots
 
+def best_per_player(legs: list[Leg], band: tuple[float, float]) -> list[Leg]:
+    """One leg per player: the strongest opinion, not the longest ladder.
 
-# --------------------------------------------------------------------------
-# Stage 1: pick the slots
-# --------------------------------------------------------------------------
-
-def select_slots(
-    slots: list[Slot], n_legs: int, cfg: BuildConfig, exclude_players: set[str]
-) -> list[Slot] | None:
-    """Greedy selection with a per-game cap and one leg per player.
-
-    Ladders are ranked by the confidence they can deliver at the per-leg price
-    the payout target implies, not by raw confidence.
+    Ranked by streak first -- the user's stated preference for trend legs over
+    nominal favourites -- then confidence, then proximity to the middle of the
+    band, so a ticket doesn't cluster at one edge of its price range.
     """
-    per_leg_log = math.log(cfg.target_decimal) / n_legs
-    ranked = sorted(
-        slots, key=lambda s: -s.reach_score(per_leg_log, cfg.error_weight)
-    )
+    centre = (american_to_prob(min(band)) + american_to_prob(max(band))) / 2
 
-    def pass_over(cap: int, chosen: list[Slot], used_players: set[str],
-                  per_game: dict[str, int]) -> None:
-        for slot in ranked:
-            if len(chosen) >= n_legs:
-                return
-            if slot.player in used_players or slot.player in exclude_players:
-                continue
-            if per_game[slot.game_id] >= cap:
-                continue
-            chosen.append(slot)
-            used_players.add(slot.player)
-            per_game[slot.game_id] += 1
+    def rank(leg: Leg):
+        return (leg.streak, leg.confidence,
+                -abs(american_to_prob(leg.est_price) - centre))
 
-    chosen: list[Slot] = []
-    used_players: set[str] = set()
+    best: dict[str, Leg] = {}
+    for leg in legs:
+        current = best.get(leg.player)
+        if current is None or rank(leg) > rank(current):
+            best[leg.player] = leg
+    return sorted(best.values(), key=rank, reverse=True)
+
+
+def select(
+    legs: list[Leg], n_legs: int, max_per_game: int, exclude_players: set[str]
+) -> list[Leg]:
+    chosen: list[Leg] = []
     per_game: dict[str, int] = defaultdict(int)
+    used: set[str] = set()
 
-    first_cap = 1 if cfg.prefer_cross_game else cfg.max_legs_per_game
-    pass_over(first_cap, chosen, used_players, per_game)
-
-    # Slate too thin for one-per-game: allow same-game legs up to the normal cap.
-    cap = first_cap
-    while len(chosen) < n_legs and cap < cfg.max_legs_per_game:
-        cap += 1
-        pass_over(cap, chosen, used_players, per_game)
-
-    # Still can't field even a minimal ticket -- one game left, say. Stretch
-    # past the normal cap so that yields a same-game ticket rather than
-    # nothing. Deliberately gated on failing to reach absolute_min_legs: a
-    # six-game slate fills 12 legs at two per game and must NOT be turned into
-    # a heavy SGP just because 20 was asked for.
-    if len(chosen) < cfg.absolute_min_legs:
-        ceiling = max(cfg.max_legs_per_game, cfg.thin_slate_max_per_game)
-        while len(chosen) < n_legs and cap < ceiling:
-            cap += 1
-            pass_over(cap, chosen, used_players, per_game)
-
-    if len(chosen) < n_legs:
-        return None
+    # One pass per game-cap level, so every distinct game is used before any
+    # game is doubled up.
+    for cap in range(1, max_per_game + 1):
+        for leg in legs:
+            if len(chosen) >= n_legs:
+                return chosen
+            if leg.player in used or leg.player in exclude_players:
+                continue
+            if per_game[leg.game_id] >= cap:
+                continue
+            chosen.append(leg)
+            used.add(leg.player)
+            per_game[leg.game_id] += 1
     return chosen
 
 
 # --------------------------------------------------------------------------
-# Stage 2: tune the rungs toward the target payout
+# Building
 # --------------------------------------------------------------------------
 
-def _log_product(slots: list[Slot]) -> float:
-    return sum(math.log(s.leg.decimal) for s in slots)
-
-
-def _objective(slots: list[Slot], log_target: float, cfg: BuildConfig) -> float:
-    conf = sum(s.leg.confidence for s in slots) / len(slots)
-    err = abs(_log_product(slots) - log_target)
-    return cfg.confidence_weight * conf - cfg.error_weight * err
-
-
-def tune(slots: list[Slot], cfg: BuildConfig) -> list[Slot]:
-    """Hill-climb single-rung moves until the objective stops improving."""
-    log_target = math.log(cfg.target_decimal)
-
-    # Warm start: put every slot on the rung closest to the even-split price.
-    per_leg_log = log_target / len(slots)
-    for slot in slots:
-        slot.chosen = min(
-            range(len(slot.rungs)),
-            key=lambda i: abs(math.log(slot.rungs[i].decimal) - per_leg_log),
-        )
-
-    current = _objective(slots, log_target, cfg)
-    for _ in range(cfg.max_iterations):
-        best_move = None
-        best_score = current
-        for si, slot in enumerate(slots):
-            original = slot.chosen
-            for ri in range(len(slot.rungs)):
-                if ri == original:
-                    continue
-                slot.chosen = ri
-                score = _objective(slots, log_target, cfg)
-                if score > best_score + 1e-9:
-                    best_score = score
-                    best_move = (si, ri)
-            slot.chosen = original
-        if best_move is None:
-            break
-        slots[best_move[0]].chosen = best_move[1]
-        current = best_score
-
-    return slots
-
-
-# --------------------------------------------------------------------------
-# Public entry point
-# --------------------------------------------------------------------------
-
-def build_parlay(
+def build_ticket(
     legs: list[Leg],
-    cfg: BuildConfig,
+    spec: TicketSpec,
     slate_date: date,
-    name: str = "Trend Parlay",
-    n_legs: int | None = None,
     exclude_players: set[str] | None = None,
+    min_season_games: dict[str, int] | None = None,
 ) -> Parlay | None:
-    """Assemble the best ticket the slate can support.
-
-    Leg count is a preference, not a requirement. A six-game Saturday night
-    cannot produce twenty legs across twenty games, and refusing to build is
-    less useful than building the best twelve-leg ticket available and saying
-    so. The search walks down from the preferred count to `absolute_min_legs`
-    and takes the first count the slate can actually fill; the resulting ticket
-    carries notes about how it fell short.
-    """
-    slots = build_slots(legs)
-    if not slots:
-        return None
-
+    """Fill one ticket, loosening the criteria a step at a time if short."""
     exclude_players = exclude_players or set()
-    log_target = math.log(cfg.target_decimal)
+    best: tuple[int, list[Leg], int] | None = None
 
-    top = n_legs or cfg.max_legs
-    floor = min(cfg.absolute_min_legs, top)
-    counts = list(range(top, floor - 1, -1))
+    for step in range(spec.relax_steps + 1):
+        band = spec.band_at(step)
+        streak = spec.streak_at(step)
+        pool = eligible(legs, spec, band, streak, min_season_games)
+        chosen = select(best_per_player(pool, band), spec.n_legs,
+                        spec.max_legs_per_game, exclude_players)
 
-    best: tuple[float, list[Slot]] | None = None
-    for n in counts:
-        chosen = select_slots(slots, n, cfg, exclude_players)
-        if chosen is None:
-            continue
-        # Fresh Slot copies so leg counts don't share tuning state.
-        chosen = [Slot(s.key, s.game_id, s.player, s.rungs) for s in chosen]
-        tuned = tune(chosen, cfg)
-        err = abs(_log_product(tuned) - log_target)
-        conf = sum(s.leg.confidence for s in tuned) / len(tuned)
-        score = conf - cfg.error_weight * err
-        if best is None or score > best[0]:
-            best = (score, tuned)
-        if err <= cfg.tolerance:
+        if best is None or len(chosen) > best[0]:
+            best = (len(chosen), chosen, step)
+        if len(chosen) >= spec.n_legs:
             break
 
-    if best is None:
+    if best is None or len(best[1]) < spec.absolute_min_legs:
         return None
 
-    parlay_legs = [s.leg for s in best[1]]
-    parlay_legs.sort(key=lambda l: (-l.confidence, l.est_price))
-    parlay = Parlay(name=name, legs=parlay_legs, slate_date=slate_date)
+    count, chosen, step = best
+    parlay = Parlay(name=spec.name, legs=list(chosen), slate_date=slate_date)
 
-    # Say plainly where the ticket fell short of what was asked for.
-    wanted = n_legs or cfg.min_legs
-    if len(parlay_legs) < wanted:
-        n_games = len({l.game_id for l in legs})
+    band = spec.band_at(step)
+    if step > 0:
         parlay.notes.append(
-            f"Short slate: {len(parlay_legs)} legs, not {wanted} — only {n_games} "
-            f"games available at {cfg.max_legs_per_game} leg(s) per game."
+            f"Criteria loosened {step} step(s) to fill this: price "
+            f"{format_american(max(band))} to {format_american(min(band))}"
+            + (f", streak {spec.streak_at(step)}+ instead of {spec.min_streak}+"
+               if spec.min_streak else "")
+        )
+    if count < spec.n_legs:
+        parlay.notes.append(
+            f"{count} legs, not {spec.n_legs} — the slate ran out of legs "
+            f"meeting this ticket's criteria even after loosening."
         )
 
-    # Flag a ticket that leans heavily on one game. Books reprice correlated
-    # legs, so the multiplied payout above is an upper bound, not a quote.
-    per_game: dict[str, int] = {}
-    for leg in parlay_legs:
-        per_game[leg.game_id] = per_game.get(leg.game_id, 0) + 1
-    biggest = max(per_game.values())
-    if biggest >= 3 and biggest >= len(parlay_legs) / 2:
-        label = next(l.game_label for l in parlay_legs
+    per_game: dict[str, int] = defaultdict(int)
+    for leg in parlay.legs:
+        per_game[leg.game_id] += 1
+    biggest = max(per_game.values()) if per_game else 0
+    if biggest >= 3 and biggest >= len(parlay.legs) / 2:
+        label = next(l.game_label for l in parlay.legs
                      if per_game[l.game_id] == biggest)
         parlay.notes.append(
-            f"{biggest} of {len(parlay_legs)} legs are in one game ({label}). "
-            f"DraftKings prices this as a same-game parlay, so the real payout "
-            f"will be well under the number above — check it before you stake."
-        )
-
-    shortfall = parlay.total_decimal / cfg.target_decimal
-    if shortfall < 0.85:
-        parlay.notes.append(
-            f"Pays {format_american(parlay.total_american)}, under the "
-            f"{format_american(cfg.target_american)} target — the slate ran out of "
-            f"legs before the payout got there."
+            f"{biggest} of {len(parlay.legs)} legs are in one game ({label}). "
+            f"The book prices that as a same-game parlay, so the real payout "
+            f"will be under the number above."
         )
 
     return parlay
@@ -298,37 +228,28 @@ def build_parlay(
 
 def build_slate(
     legs: list[Leg],
-    cfg: BuildConfig,
+    specs: list[TicketSpec],
     slate_date: date,
-    profiles: list[dict] | None = None,
+    min_season_games: dict[str, int] | None = None,
+    share_players: bool = False,
 ) -> list[Parlay]:
-    """Build several tickets that do not share players.
+    """Build every ticket for the day.
 
-    Each profile may override leg count and target so one run can produce a
-    heavier, higher-probability ticket alongside a longer-priced one.
+    Tickets don't share players by default: the same hot bat appearing on all
+    three turns them into one correlated bet wearing three hats.
     """
-    profiles = profiles or [
-        {"name": "Max Trend", "n_legs": cfg.max_legs},
-        {"name": "Balanced", "n_legs": (cfg.min_legs + cfg.max_legs) // 2},
-        {"name": "Lean", "n_legs": cfg.min_legs},
-    ]
-
     out: list[Parlay] = []
     used: set[str] = set()
-    for profile in profiles:
-        sub_cfg = BuildConfig(**{**cfg.__dict__, **{
-            k: v for k, v in profile.items() if k in BuildConfig.__annotations__
-        }})
-        parlay = build_parlay(
-            legs,
-            sub_cfg,
-            slate_date,
-            name=profile.get("name", "Trend Parlay"),
-            n_legs=profile.get("n_legs"),
-            exclude_players=set(used),
+    for spec in specs:
+        ticket = build_ticket(
+            legs, spec, slate_date,
+            exclude_players=set() if share_players else set(used),
+            min_season_games=min_season_games,
         )
-        if parlay is None:
+        if ticket is None:
+            log.warning("could not build %s", spec.name)
             continue
-        out.append(parlay)
-        used.update(leg.player for leg in parlay.legs)
+        out.append(ticket)
+        if not share_players:
+            used.update(leg.player for leg in ticket.legs)
     return out

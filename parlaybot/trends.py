@@ -271,6 +271,9 @@ def build_legs_for_player(
     """
     legs: list[Leg] = []
     volatility = playing_time_volatility(player.logs, cfg.window)
+    # Recorded on every leg so opponent-strength modelling has the data when
+    # we come to build it.
+    opponent = game_label.replace(player.team, "").replace("@", "").strip()
 
     band_lo, band_hi = min(price_band), max(price_band)
     # No core band configured means every price inside price_band is free entry.
@@ -383,6 +386,9 @@ def build_legs_for_player(
                     streak=streak,
                     window_record=record,
                     confidence=conf,
+                    opponent=opponent,
+                    current_games=player.current_game_count,
+                    prior_season_only=prior_season_only,
                     notes=notes + ([notes_extra] if notes_extra else []),
                 )
             )

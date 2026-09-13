@@ -8,7 +8,7 @@ from pathlib import Path
 
 import yaml
 
-from .builder import BuildConfig
+from .builder import DEFAULT_SPECS, TicketSpec
 from .calibration import CalibrationConfig
 from .trends import TrendConfig
 
@@ -24,15 +24,12 @@ class Settings:
     min_season_games: dict = field(default_factory=lambda: {
         "MLB": 8, "NFL": 4, "NBA": 8, "NHL": 8,
     })
-    price_band: tuple[float, float] = (-1200.0, -400.0)
-    core_price_band: tuple[float, float] = (-900.0, -550.0)
-    parlays: list[dict] = field(default_factory=lambda: [
-        {"name": "Max Trend", "n_legs": 20},
-        {"name": "Balanced", "n_legs": 18},
-        {"name": "Lean", "n_legs": 15},
-    ])
+    # Hard outer limit on any leg, wide enough to cover every ticket's band.
+    price_band: tuple[float, float] = (-1400.0, -150.0)
+    tickets: list[TicketSpec] = field(
+        default_factory=lambda: [TicketSpec(**s.__dict__) for s in DEFAULT_SPECS]
+    )
     trend: TrendConfig = field(default_factory=TrendConfig)
-    build: BuildConfig = field(default_factory=BuildConfig)
     calibration: CalibrationConfig = field(default_factory=CalibrationConfig)
     discord_webhook: str = ""
     discord_results_webhook: str = ""
@@ -49,17 +46,20 @@ class Settings:
             raw = yaml.safe_load(p.read_text()) or {}
 
         trend = TrendConfig(**(raw.pop("trend", None) or {}))
-        build = BuildConfig(**(raw.pop("build", None) or {}))
         calib = CalibrationConfig(**(raw.pop("calibration", None) or {}))
 
+        raw_tickets = raw.pop("tickets", None)
+        tickets = (
+            [TicketSpec(**t) for t in raw_tickets] if raw_tickets
+            else [TicketSpec(**s.__dict__) for s in DEFAULT_SPECS]
+        )
+
         band = raw.pop("price_band", None)
-        core = raw.pop("core_price_band", None)
         settings = cls(
             trend=trend,
-            build=build,
             calibration=calib,
+            tickets=tickets,
             price_band=tuple(band) if band else cls.price_band,
-            core_price_band=tuple(core) if core else cls.core_price_band,
             **{k: v for k, v in raw.items() if k in cls.__annotations__},
         )
 

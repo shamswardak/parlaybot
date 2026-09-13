@@ -118,3 +118,20 @@ def test_running_record_counts_across_files():
         assert rec["wins"] == 2
         assert rec["losses"] == 1
         assert rec["tickets"] == 3
+
+
+def test_ledger_records_what_opponent_modelling_will_need():
+    """Not used yet — but the history has to exist before we can model it."""
+    with tempfile.TemporaryDirectory() as d:
+        leg = _leg()
+        leg.update({"opponent": "BOS", "game": "NYY @ BOS", "team": "NYY"})
+        r = TicketResult(name="T", slate_date=date(2026, 9, 12),
+                         legs=[LegResult(leg=leg, status=HIT, actual=3)],
+                         total_american=1500, model_probability=0.04)
+        append_graded_legs(d, date(2026, 9, 12), [r])
+        row = json.loads((Path(d) / "legs.jsonl").read_text().splitlines()[0])
+        for key in ("opponent", "game", "team", "actual", "threshold",
+                    "market", "streak", "model_prob", "hit"):
+            assert key in row, f"ledger is missing {key}"
+        assert row["opponent"] == "BOS"
+        assert row["actual"] == 3

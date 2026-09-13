@@ -1,7 +1,7 @@
 import json
 from datetime import date
 
-from parlaybot.builder import BuildConfig, build_slate
+from parlaybot.builder import DEFAULT_SPECS, build_slate
 from parlaybot.discord_out import build_embeds, chunk_embeds, embed_chars, to_console
 from parlaybot.trends import TrendConfig, build_legs_for_player
 
@@ -23,10 +23,10 @@ def _parlays():
                 player, markets=MARKETS, game_id=matchup.game_id,
                 game_label=matchup.label,
                 is_home=player.team == matchup.home_team, short_rest=False,
-                cfg=TrendConfig(), hold=0.06, price_band=(-1200, -400),
+                cfg=TrendConfig(), hold=0.06, price_band=(-1400, -150),
             )
         )
-    return build_slate(legs, BuildConfig(), date.today())
+    return build_slate(legs, DEFAULT_SPECS, date.today())
 
 
 def test_embeds_respect_discord_limits():
@@ -101,12 +101,41 @@ def test_playbook_line_lists_every_leg():
     assert "Hits+Runs+RBI" not in line
 
 
-def test_playbook_embed_is_present_and_copyable():
-    from parlaybot.discord_out import build_embeds
+def test_slip_list_goes_out_as_its_own_plain_message():
+    """Mobile can only copy whole messages, so the list must BE a message."""
+    from parlaybot.discord_out import playbook_line, slip_messages
     parlays = _parlays()
-    embeds = build_embeds(parlays, date.today(), [])
-    slips = [e for e in embeds if "copy into a slip builder" in e.get("title", "")]
-    assert len(slips) == len(parlays)
-    for e in slips:
-        assert "```" in e["description"]
-        assert len(e["description"]) <= MAX_TOTAL_CHARS
+    msgs = slip_messages(parlays)
+    assert len(msgs) == 2 * len(parlays)      # a label, then the bare list
+
+    for parlay, payload in zip(parlays, msgs[1::2]):
+        content = payload["content"]
+        assert content == playbook_line(parlay)[:1900]
+        assert "embeds" not in payload, "an embed would break copy-on-mobile"
+        assert "```" not in content, "a fence would be copied along with the list"
+        assert not content.startswith("*"), "no heading to strip out"
+        assert len(content) <= 2000          # Discord's content cap
+
+
+def test_slip_messages_are_json_serialisable():
+    from parlaybot.discord_out import slip_messages
+    json.dumps(slip_messages(_parlays()))
+
+
+def test_empty_slate_explains_itself():
+    """A run with nothing to bet must say why, not post a bare header."""
+    from parlaybot.discord_out import build_embeds
+    notes = ["MLB: 1 bettable games (14 already started)", "NFL: no games today"]
+    embeds = build_embeds([], date.today(), notes)
+    assert len(embeds) == 1
+    assert "No tickets" in embeds[0]["title"]
+    body = embeds[0]["description"] + str(embeds[0]["fields"])
+    assert "already started" in body
+    assert embed_chars(embeds[0]) <= MAX_TOTAL_CHARS
+
+
+def test_empty_slate_with_no_notes_still_renders():
+    from parlaybot.discord_out import build_embeds
+    embeds = build_embeds([], date.today(), [])
+    assert len(embeds) == 1
+    assert embeds[0]["fields"][0]["value"]

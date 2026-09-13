@@ -90,6 +90,9 @@ class Leg:
     streak: int            # consecutive games hit, most recent first
     window_record: str     # "8/8 L8 - 13/15 L15 - 22/26 season"
     confidence: float      # 0-1, drives ordering and filtering
+    opponent: str = ""     # kept for future opponent-strength modelling
+    current_games: int = 0     # games played THIS season
+    prior_season_only: bool = False
     notes: list[str] = field(default_factory=list)
 
     @property
@@ -120,6 +123,9 @@ class Leg:
             "raw_hit_rate": round(self.raw_hit_rate, 4),
             "record": self.window_record,
             "streak": self.streak,
+            "opponent": self.opponent,
+            "current_games": self.current_games,
+            "prior_season_only": self.prior_season_only,
             "confidence": round(self.confidence, 3),
             "notes": self.notes,
         }
@@ -160,6 +166,18 @@ class Parlay:
     def expected_value(self) -> float:
         """Per 1 unit staked, using the model's own probabilities."""
         return self.model_probability * self.total_decimal
+
+    @property
+    def average_leg_price(self) -> float:
+        """Average leg price in American odds, via probability (not a raw mean).
+
+        Averaging American odds directly is meaningless -- they're not linear.
+        This averages the implied probabilities and converts back.
+        """
+        if not self.legs:
+            return 0.0
+        mean_prob = sum(1.0 / leg.decimal for leg in self.legs) / len(self.legs)
+        return prob_to_american(mean_prob)
 
     @property
     def sgp_legs(self) -> list[Leg]:
