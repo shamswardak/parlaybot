@@ -43,7 +43,7 @@ def collect_legs(settings: Settings, on: date, client: HttpClient
             continue
 
         try:
-            source = source_cls(client)
+            source = source_cls(client, lead_minutes=settings.min_minutes_to_start)
             matchups = source.slate(on)
         except Exception as exc:  # a dead upstream must not kill the run
             log.exception("%s slate failed", sport)

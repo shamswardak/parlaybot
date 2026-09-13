@@ -39,8 +39,9 @@ class MLBSource(SportSource):
     sport = "MLB"
     markets = {**HITTER_MARKETS, **PITCHER_MARKETS}
 
-    def __init__(self, client, max_hitters_per_team: int = 7) -> None:
-        super().__init__(client)
+    def __init__(self, client, max_hitters_per_team: int = 7,
+                 lead_minutes: int = 20) -> None:
+        super().__init__(client, lead_minutes)
         self.max_hitters_per_team = max_hitters_per_team
         self._team_abbr: dict[int, str] = {}
         self._team_of_player: dict[str, str] = {}
@@ -72,9 +73,18 @@ class MLBSource(SportSource):
             ttl_tag=f"sched-{on}",
         )
         out: list[Matchup] = []
+        skipped = 0
         for day in (data or {}).get("dates", []):
             for g in day.get("games", []):
-                if g.get("status", {}).get("abstractGameState") == "Final":
+                status = g.get("status", {})
+                # abstractGameState is Preview / Live / Final; detailedState
+                # carries Postponed, Suspended, Delayed and friends.
+                if status.get("abstractGameState") != "Preview":
+                    skipped += 1
+                    continue
+                if not self.is_bettable(g.get("gameDate"),
+                                        status.get("detailedState", "")):
+                    skipped += 1
                     continue
                 home = g["teams"]["home"]["team"]
                 away = g["teams"]["away"]["team"]
@@ -87,7 +97,8 @@ class MLBSource(SportSource):
                 )
                 m._raw = g  # type: ignore[attr-defined]
                 out.append(m)
-        log.info("MLB slate: %d games", len(out))
+        log.info("MLB slate: %d bettable games (%d already started or unavailable)",
+                 len(out), skipped)
         return out
 
     # -- players -----------------------------------------------------------

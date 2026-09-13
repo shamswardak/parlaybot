@@ -8,19 +8,68 @@ alternate-line ladder (1 rebound, 5 receiving yards, and so on).
 
 from __future__ import annotations
 
+import logging
 from abc import ABC, abstractmethod
-from datetime import date
+from datetime import date, datetime, timedelta, timezone
 
 from ..http import HttpClient
 from ..models import Matchup, PlayerSeason
+
+log = logging.getLogger(__name__)
+
+# Statuses that mean the game is under way or done with. Anything here is not
+# bettable at pregame prices, whatever the schedule date says.
+DEAD_STATES = {
+    "live", "in progress", "final", "game over", "completed", "postponed",
+    "suspended", "cancelled", "canceled", "delayed", "off", "crit", "fut-off",
+}
+
+
+def parse_utc(value: str | None) -> datetime | None:
+    """Parse the ISO timestamps these APIs hand back, normalised to UTC."""
+    if not value:
+        return None
+    text = str(value).strip().replace("Z", "+00:00")
+    try:
+        parsed = datetime.fromisoformat(text)
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(timezone.utc)
 
 
 class SportSource(ABC):
     sport: str = ""
     markets: dict[str, dict] = {}
 
-    def __init__(self, client: HttpClient) -> None:
+    def __init__(self, client: HttpClient, lead_minutes: int = 20) -> None:
         self.client = client
+        # Don't offer a game that has started, or is about to. A leg on a game
+        # already in progress can't be bet at the price the model estimated,
+        # and may be half-decided already.
+        self.lead_minutes = lead_minutes
+
+    def is_bettable(self, start: str | datetime | None, status: str = "",
+                    now: datetime | None = None) -> bool:
+        """True when the game hasn't started and there's time to place a bet.
+
+        Both checks matter. Status catches games the API already knows are
+        live, and the clock catches the gap where a game has started but the
+        feed hasn't updated -- or where it starts in four minutes and there's
+        no realistic chance of getting the bet down.
+        """
+        if status and status.strip().lower() in DEAD_STATES:
+            return False
+
+        start_dt = start if isinstance(start, datetime) else parse_utc(start)
+        if start_dt is None:
+            # No start time: fall back to status alone rather than dropping a
+            # game the feed simply didn't timestamp.
+            return True
+
+        now = now or datetime.now(timezone.utc)
+        return start_dt > now + timedelta(minutes=self.lead_minutes)
 
     @abstractmethod
     def slate(self, on: date) -> list[Matchup]:

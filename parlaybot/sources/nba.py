@@ -64,8 +64,9 @@ class NBASource(SportSource):
     sport = "NBA"
     markets = MARKETS
 
-    def __init__(self, client, games_back: int = 20) -> None:
-        super().__init__(client)
+    def __init__(self, client, games_back: int = 20,
+                 lead_minutes: int = 20) -> None:
+        super().__init__(client, lead_minutes)
         self.games_back = games_back
         self._schedule: list[dict] | None = None
 
@@ -96,23 +97,30 @@ class NBASource(SportSource):
                     "home": (g.get("homeTeam") or {}).get("teamTricode", ""),
                     "away": (g.get("awayTeam") or {}).get("teamTricode", ""),
                     "time": g.get("gameDateTimeUTC", ""),
+                    # gameStatus: 1 scheduled, 2 in progress, 3 final.
+                    "status": g.get("gameStatus"),
                 })
         self._schedule = games
         return games
 
     def slate(self, on: date) -> list[Matchup]:
-        out = [
-            Matchup(
+        out: list[Matchup] = []
+        skipped = 0
+        for g in self._load_schedule():
+            if g["date"] != on or not (g["home"] and g["away"]):
+                continue
+            if g.get("status") not in (None, 1) or not self.is_bettable(g["time"]):
+                skipped += 1
+                continue
+            out.append(Matchup(
                 game_id=f"NBA-{g['gameId']}",
                 sport="NBA",
                 home_team=g["home"],
                 away_team=g["away"],
                 start_time=g["time"],
-            )
-            for g in self._load_schedule()
-            if g["date"] == on and g["home"] and g["away"]
-        ]
-        log.info("NBA slate: %d games", len(out))
+            ))
+        log.info("NBA slate: %d bettable games (%d already started)",
+                 len(out), skipped)
         return out
 
     # -- game logs ---------------------------------------------------------

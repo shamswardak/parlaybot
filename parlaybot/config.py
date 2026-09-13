@@ -17,6 +17,7 @@ from .trends import TrendConfig
 class Settings:
     sports: list[str] = field(default_factory=lambda: ["MLB", "NFL", "NBA", "NHL"])
     market_hold: float = 0.06
+    min_minutes_to_start: int = 20
     price_band: tuple[float, float] = (-1200.0, -400.0)
     parlays: list[dict] = field(default_factory=lambda: [
         {"name": "Max Trend", "n_legs": 20},

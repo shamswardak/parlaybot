@@ -42,8 +42,9 @@ class NHLSource(SportSource):
     sport = "NHL"
     markets = {**SKATER_MARKETS, **GOALIE_MARKETS}
 
-    def __init__(self, client, skaters_per_team: int = 9) -> None:
-        super().__init__(client)
+    def __init__(self, client, skaters_per_team: int = 9,
+                 lead_minutes: int = 20) -> None:
+        super().__init__(client, lead_minutes)
         self.skaters_per_team = skaters_per_team
 
     def slate(self, on: date) -> list[Matchup]:
@@ -52,10 +53,16 @@ class NHLSource(SportSource):
             ttl_tag=f"nhl-sched-{on}"
         )
         out: list[Matchup] = []
+        skipped = 0
         for week in (data or {}).get("gameWeek", []):
             if week.get("date") != on.isoformat():
                 continue
             for g in week.get("games", []):
+                # gameState: FUT (future), PRE (pregame), LIVE, CRIT, OFF, FINAL.
+                if not self.is_bettable(g.get("startTimeUTC"),
+                                        g.get("gameState", "")):
+                    skipped += 1
+                    continue
                 out.append(
                     Matchup(
                         game_id=f"NHL-{g.get('id')}",
@@ -65,7 +72,8 @@ class NHLSource(SportSource):
                         start_time=g.get("startTimeUTC", ""),
                     )
                 )
-        log.info("NHL slate: %d games", len(out))
+        log.info("NHL slate: %d bettable games (%d already started)",
+                 len(out), skipped)
         return out
 
     def _roster(self, team: str) -> list[dict]:

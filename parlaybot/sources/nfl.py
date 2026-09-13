@@ -8,7 +8,8 @@ from __future__ import annotations
 
 import io
 import logging
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
+from zoneinfo import ZoneInfo
 
 import pandas as pd
 
@@ -47,8 +48,9 @@ class NFLSource(SportSource):
     sport = "NFL"
     markets = MARKETS
 
-    def __init__(self, client, lookback_seasons: int = 2) -> None:
-        super().__init__(client)
+    def __init__(self, client, lookback_seasons: int = 2,
+                 lead_minutes: int = 20) -> None:
+        super().__init__(client, lead_minutes)
         self.lookback_seasons = lookback_seasons
         self._weekly: pd.DataFrame | None = None
         self._schedule: pd.DataFrame | None = None
@@ -102,7 +104,15 @@ class NFLSource(SportSource):
             return []
         day = sched[sched["gameday"].astype(str) == on.isoformat()]
         out: list[Matchup] = []
+        skipped = 0
         for _, row in day.iterrows():
+            # A filled-in result means the game is over.
+            if "result" in row and pd.notna(row["result"]):
+                skipped += 1
+                continue
+            if not self.is_bettable(self._kickoff_utc(row)):
+                skipped += 1
+                continue
             out.append(
                 Matchup(
                     game_id=f"NFL-{row.get('game_id', f'{row.home_team}{row.away_team}')}",
@@ -112,8 +122,25 @@ class NFLSource(SportSource):
                     start_time=str(row.get("gametime", "")),
                 )
             )
-        log.info("NFL slate: %d games", len(out))
+        log.info("NFL slate: %d bettable games (%d already started)",
+                 len(out), skipped)
         return out
+
+    @staticmethod
+    def _kickoff_utc(row) -> datetime | None:
+        """nflverse stores gameday as a date and gametime as US Eastern HH:MM."""
+        gametime = row.get("gametime")
+        if not gametime or pd.isna(gametime):
+            return None
+        try:
+            naive = datetime.strptime(
+                f"{row['gameday']} {str(gametime)[:5]}", "%Y-%m-%d %H:%M"
+            )
+        except (ValueError, KeyError):
+            return None
+        return naive.replace(tzinfo=ZoneInfo("America/New_York")).astimezone(
+            timezone.utc
+        )
 
     # -- players -----------------------------------------------------------
 
