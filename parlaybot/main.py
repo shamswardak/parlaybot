@@ -51,7 +51,16 @@ def collect_legs(settings: Settings, on: date, client: HttpClient
             continue
 
         if not matchups:
-            notes.append(f"{sport}: no games today")
+            # "Nothing scheduled" and "everything already started" look the
+            # same from here unless the source reports what it dropped.
+            dropped = getattr(source, "last_skipped", 0)
+            if dropped:
+                notes.append(
+                    f"{sport}: {dropped} game(s) scheduled, none still bettable "
+                    f"(already started or too close to first pitch)"
+                )
+            else:
+                notes.append(f"{sport}: no games scheduled")
             continue
 
         try:

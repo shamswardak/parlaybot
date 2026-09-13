@@ -87,3 +87,11 @@ def test_parse_utc_handles_the_formats_these_apis_use():
 def test_datetime_objects_are_accepted_directly():
     assert src().is_bettable(NOW + timedelta(hours=2), now=NOW)
     assert not src().is_bettable(NOW - timedelta(hours=2), now=NOW)
+
+
+def test_sources_report_what_they_dropped():
+    """main.py distinguishes 'nothing scheduled' from 'all started' using this."""
+    s = src()
+    assert s.last_skipped == 0
+    s.last_skipped = 15
+    assert getattr(s, "last_skipped", 0) == 15

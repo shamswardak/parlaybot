@@ -72,6 +72,7 @@ class NHLSource(SportSource):
                         start_time=g.get("startTimeUTC", ""),
                     )
                 )
+        self.last_skipped = skipped
         log.info("NHL slate: %d bettable games (%d already started)",
                  len(out), skipped)
         return out

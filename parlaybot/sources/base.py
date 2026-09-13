@@ -49,6 +49,9 @@ class SportSource(ABC):
         # already in progress can't be bet at the price the model estimated,
         # and may be half-decided already.
         self.lead_minutes = lead_minutes
+        # How many of today's games slate() dropped as already under way. Lets
+        # the report tell "nothing scheduled" apart from "everything started".
+        self.last_skipped = 0
 
     def is_bettable(self, start: str | datetime | None, status: str = "",
                     now: datetime | None = None) -> bool:

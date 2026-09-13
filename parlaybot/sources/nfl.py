@@ -122,6 +122,7 @@ class NFLSource(SportSource):
                     start_time=str(row.get("gametime", "")),
                 )
             )
+        self.last_skipped = skipped
         log.info("NFL slate: %d bettable games (%d already started)",
                  len(out), skipped)
         return out

@@ -97,6 +97,7 @@ class MLBSource(SportSource):
                 )
                 m._raw = g  # type: ignore[attr-defined]
                 out.append(m)
+        self.last_skipped = skipped
         log.info("MLB slate: %d bettable games (%d already started or unavailable)",
                  len(out), skipped)
         return out

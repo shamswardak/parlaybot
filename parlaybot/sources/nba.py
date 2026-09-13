@@ -119,6 +119,7 @@ class NBASource(SportSource):
                 away_team=g["away"],
                 start_time=g["time"],
             ))
+        self.last_skipped = skipped
         log.info("NBA slate: %d bettable games (%d already started)",
                  len(out), skipped)
         return out
