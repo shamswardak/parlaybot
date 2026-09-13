@@ -75,10 +75,38 @@ def test_cross_game_preference_uses_every_game_first():
     assert len(per_game) == 10
 
 
-def test_thin_slate_returns_none_rather_than_a_bad_ticket():
-    legs, _ = _legs(n_games=1, per_team=2)
+def test_thin_slate_builds_the_best_available_ticket():
+    """A six-game night should still produce a ticket, not a refusal."""
+    legs, _ = _legs(n_games=6)
     cfg = BuildConfig(min_legs=15, max_legs=20, max_legs_per_game=2)
+    p = build_parlay(legs, cfg, date.today(), n_legs=20)
+    assert p is not None
+    # 6 games x 2 legs per game is the ceiling.
+    assert len(p.legs) <= 12
+    assert len(p.legs) >= cfg.absolute_min_legs
+    assert p.notes, "a short ticket must say that it is short"
+    assert "Short slate" in p.notes[0]
+
+
+def test_thin_slate_still_pushes_toward_the_payout_target():
+    """Fewer legs means each must be longer; the tuner should still try."""
+    legs, _ = _legs(n_games=6)
+    p = build_parlay(legs, BuildConfig(), date.today(), n_legs=20)
+    assert p.total_decimal > 5.0
+
+
+def test_below_absolute_minimum_returns_none():
+    legs, _ = _legs(n_games=1, per_team=1)
+    cfg = BuildConfig(absolute_min_legs=8, max_legs_per_game=2)
     assert build_parlay(legs, cfg, date.today(), n_legs=20) is None
+
+
+def test_full_slate_still_honours_the_requested_leg_count():
+    """The fallback must not make the builder lazy on a healthy slate."""
+    legs, _ = _legs(n_games=13)
+    p = build_parlay(legs, BuildConfig(), date.today(), n_legs=20)
+    assert len(p.legs) == 20
+    assert not p.notes
 
 
 def test_slate_tickets_do_not_share_players():

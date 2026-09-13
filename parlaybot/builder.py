@@ -24,13 +24,15 @@ from dataclasses import dataclass
 from datetime import date
 
 from .models import Leg, Parlay
+from .odds import format_american
 
 
 @dataclass
 class BuildConfig:
     target_american: float = 1500.0
-    min_legs: int = 15
+    min_legs: int = 15               # preferred floor, not a hard wall
     max_legs: int = 20
+    absolute_min_legs: int = 4       # below this a "parlay" isn't worth printing
     max_legs_per_game: int = 2       # >1 permits SGP fill
     prefer_cross_game: bool = True
     tolerance: float = 0.12          # acceptable |log(product/target)|
@@ -204,7 +206,15 @@ def build_parlay(
     n_legs: int | None = None,
     exclude_players: set[str] | None = None,
 ) -> Parlay | None:
-    """Assemble one ticket, or None if the slate cannot support it."""
+    """Assemble the best ticket the slate can support.
+
+    Leg count is a preference, not a requirement. A six-game Saturday night
+    cannot produce twenty legs across twenty games, and refusing to build is
+    less useful than building the best twelve-leg ticket available and saying
+    so. The search walks down from the preferred count to `absolute_min_legs`
+    and takes the first count the slate can actually fill; the resulting ticket
+    carries notes about how it fell short.
+    """
     slots = build_slots(legs)
     if not slots:
         return None
@@ -212,7 +222,9 @@ def build_parlay(
     exclude_players = exclude_players or set()
     log_target = math.log(cfg.target_decimal)
 
-    counts = [n_legs] if n_legs else list(range(cfg.max_legs, cfg.min_legs - 1, -1))
+    top = n_legs or cfg.max_legs
+    floor = min(cfg.absolute_min_legs, top)
+    counts = list(range(top, floor - 1, -1))
 
     best: tuple[float, list[Slot]] | None = None
     for n in counts:
@@ -235,7 +247,26 @@ def build_parlay(
 
     parlay_legs = [s.leg for s in best[1]]
     parlay_legs.sort(key=lambda l: (-l.confidence, l.est_price))
-    return Parlay(name=name, legs=parlay_legs, slate_date=slate_date)
+    parlay = Parlay(name=name, legs=parlay_legs, slate_date=slate_date)
+
+    # Say plainly where the ticket fell short of what was asked for.
+    wanted = n_legs or cfg.min_legs
+    if len(parlay_legs) < wanted:
+        n_games = len({l.game_id for l in legs})
+        parlay.notes.append(
+            f"Short slate: {len(parlay_legs)} legs, not {wanted} — only {n_games} "
+            f"games available at {cfg.max_legs_per_game} leg(s) per game."
+        )
+
+    shortfall = parlay.total_decimal / cfg.target_decimal
+    if shortfall < 0.85:
+        parlay.notes.append(
+            f"Pays {format_american(parlay.total_american)}, under the "
+            f"{format_american(cfg.target_american)} target — the slate ran out of "
+            f"legs before the payout got there."
+        )
+
+    return parlay
 
 
 def build_slate(

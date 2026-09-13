@@ -88,20 +88,26 @@ def run(settings: Settings, on: date) -> int:
     legs, notes = collect_legs(settings, on, client)
 
     if not legs:
-        log.error("no candidate legs found")
+        # An empty slate is not a failure -- it's an off day. Report it and
+        # exit clean so the run doesn't show up as broken.
+        log.warning("no candidate legs found for %s", on)
         if settings.discord_webhook and not settings.dry_run:
             discord_out.send(settings.discord_webhook, [], on,
-                             notes + ["No qualifying legs on today's slate."])
-        return 1
+                             notes + ["No qualifying legs on this slate."])
+        return 0
 
     log.info("%d candidate legs across %d games",
              len(legs), len({l.game_id for l in legs}))
 
     parlays = build_slate(legs, settings.build, on, profiles=settings.parlays)
     if not parlays:
-        notes.append("Slate too thin to reach the target leg count.")
-        log.error("no parlays built")
-        return 1
+        msg = (f"Only {len({l.game_id for l in legs})} games available — not enough "
+               f"for even a {settings.build.absolute_min_legs}-leg ticket.")
+        notes.append(msg)
+        log.warning("no parlays built: %s", msg)
+        if settings.discord_webhook and not settings.dry_run:
+            discord_out.send(settings.discord_webhook, [], on, notes)
+        return 0
 
     Path(settings.output_dir).mkdir(parents=True, exist_ok=True)
     out_path = Path(settings.output_dir) / f"parlays-{on.isoformat()}.json"

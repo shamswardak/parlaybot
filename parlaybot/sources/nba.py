@@ -21,6 +21,17 @@ SCHEDULE_URL = "https://cdn.nba.com/static/json/staticData/scheduleLeagueV2_1.js
 SCHEDULE_FALLBACK = "https://cdn.nba.com/static/json/staticData/scheduleLeagueV2.json"
 BOXSCORE_URL = "https://cdn.nba.com/static/json/liveData/boxscore/boxscore_{gid}.json"
 
+# The CDN answers 403 to requests that don't look like they came from nba.com.
+# Sending the origin headers a browser would send is what gets it to serve.
+NBA_HEADERS = {
+    "Referer": "https://www.nba.com/",
+    "Origin": "https://www.nba.com",
+    "Accept": "application/json, text/plain, */*",
+    "Sec-Fetch-Site": "same-site",
+    "Sec-Fetch-Mode": "cors",
+    "Sec-Fetch-Dest": "empty",
+}
+
 MARKETS = {
     "points": {"label": "Points", "step": 1},
     "rebounds": {"label": "Rebounds", "step": 1},
@@ -63,10 +74,13 @@ class NBASource(SportSource):
     def _load_schedule(self) -> list[dict]:
         if self._schedule is not None:
             return self._schedule
-        data = self.client.get_json(SCHEDULE_URL, cache_ttl=21600, ttl_tag="nba-sched")
+        data = self.client.get_json(
+            SCHEDULE_URL, headers=NBA_HEADERS, cache_ttl=21600, ttl_tag="nba-sched"
+        )
         if not data:
             data = self.client.get_json(
-                SCHEDULE_FALLBACK, cache_ttl=21600, ttl_tag="nba-sched-fb"
+                SCHEDULE_FALLBACK, headers=NBA_HEADERS, cache_ttl=21600,
+                ttl_tag="nba-sched-fb"
             )
         games: list[dict] = []
         for gd in ((data or {}).get("leagueSchedule", {}).get("gameDates", [])):
@@ -116,6 +130,7 @@ class NBASource(SportSource):
         # Final box scores never change, so cache for a year.
         return self.client.get_json(
             BOXSCORE_URL.format(gid=game_id),
+            headers=NBA_HEADERS,
             cache_ttl=31_536_000,
             ttl_tag=f"box-{game_id}",
         )

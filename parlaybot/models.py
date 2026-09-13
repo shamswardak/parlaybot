@@ -115,6 +115,7 @@ class Parlay:
     name: str
     legs: list[Leg]
     slate_date: date
+    notes: list[str] = field(default_factory=list)
 
     @property
     def total_decimal(self) -> float:
@@ -165,5 +166,6 @@ class Parlay:
             "model_probability": round(self.model_probability, 5),
             "implied_probability": round(self.implied_probability, 5),
             "expected_value": round(self.expected_value, 4),
+            "notes": self.notes,
             "legs": [leg.to_dict() for leg in self.legs],
         }

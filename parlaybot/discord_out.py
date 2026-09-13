@@ -104,6 +104,12 @@ def build_embeds(parlays: list[Parlay], slate: date, notes: list[str]) -> list[d
                 f"~1 hit per {1 / max(parlay.model_probability, 1e-9):,.0f} tickets",
                 "inline": True},
         ]
+        if parlay.notes:
+            fields.append({
+                "name": "⚠️ Heads up",
+                "value": "\n".join(parlay.notes)[:1000],
+                "inline": False,
+            })
         if sgp_count:
             fields.append({
                 "name": "⚠️ Same-game legs",
@@ -168,6 +174,8 @@ def to_console(parlays: list[Parlay], slate: date, notes: list[str]) -> str:
     for p in parlays:
         out.append("")
         out.append(f"--- {p.name}: {len(p.legs)} legs, {p.n_games} games ---")
+        for note in p.notes:
+            out.append(f"    ! {note}")
         out.append(
             f"    Est payout {format_american(p.total_american)} "
             f"({p.total_decimal:.2f}x) | model {p.model_probability*100:.2f}% | "

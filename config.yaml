@@ -44,8 +44,11 @@ trend:
 
 build:
   target_american: 1500   # +1500 ≈ 16x your stake
-  min_legs: 15
+  min_legs: 15            # preferred floor, NOT a hard wall
   max_legs: 20
+  absolute_min_legs: 4    # on a thin slate, build the best ticket available
+                          # down to this many legs and flag that it's short
+                          # rather than refusing to build at all
   max_legs_per_game: 2    # >1 permits same-game fill on thin slates
   prefer_cross_game: true # fill every distinct game before doubling up
   tolerance: 0.12         # acceptable |log(actual/target)| before it stops tuning
