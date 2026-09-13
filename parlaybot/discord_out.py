@@ -29,9 +29,10 @@ PLAYBOOK_MARKET = {
 def playbook_line(parlay: "Parlay") -> str:
     """One comma-separated string of every selection, for a slip builder.
 
-    Paste target is Playbook (actionnetwork.com/playbook), which turns a list
-    like this into a prefilled DraftKings/FanDuel slip. Nothing here is
-    specific to that service though -- it's just the ticket in plain words.
+    Paste target is Playbook (playbookbot.com), which turns a list like this
+    into a prefilled DraftKings/FanDuel slip. Nothing here is specific to that
+    service though -- it's just the ticket in plain words, so it works with any
+    slip builder that accepts typed selections.
     """
     parts = []
     for leg in parlay.legs:
@@ -165,7 +166,7 @@ def build_embeds(parlays: list[Parlay], slate: date, notes: list[str]) -> list[d
             "title": f"📋 {parlay.name} — copy into a slip builder",
             "description": (
                 f"```\n{slip}\n```\n"
-                "Paste into [Playbook](https://www.actionnetwork.com/playbook) "
+                "Paste into [Playbook](https://playbookbot.com/) "
                 "to get a prefilled DraftKings/FanDuel slip. "
                 "**Check every price before you submit** — the odds above are "
                 "estimates, not quotes."
