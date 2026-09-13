@@ -52,6 +52,17 @@ class TicketSpec:
     # widens its way up to -900 has quietly become the safe ticket -- so the
     # streak gives first.
     streak_relax_steps: int = 2
+    # "safe"  -- take the heaviest-priced legs available, trends break ties
+    # "trend" -- take the longest streaks, price breaks ties
+    prefer: str = "trend"
+    # Per-market price bands, overriding price_min/price_max for those markets.
+    # Markets don't price alike: a starter's strikeout floor genuinely reaches
+    # -900 because innings are predictable, where no hitter's prop does. One
+    # band across all of them either excludes the pitcher legs or lets in
+    # hitter legs that were never that safe.
+    market_bands: dict = field(default_factory=dict)
+    # Markets to fill from first when everything else is equal.
+    preferred_markets: list = field(default_factory=list)
 
     def band_at(self, step: int) -> tuple[float, float]:
         """The price band after `step` relaxation passes.
@@ -61,9 +72,16 @@ class TicketSpec:
         of points would loosen the long end drastically and the short end
         barely at all.
         """
+        return self.band_for(None, step)
+
+    def band_for(self, market: str | None, step: int) -> tuple[float, float]:
+        """Band for one market, after `step` relaxation passes."""
+        edges = self.market_bands.get(market) if market else None
+        lo_a, hi_a = (edges if edges else (self.price_min, self.price_max))
+
         widen = max(0, step - self._streak_budget)
-        lo_p = american_to_prob(self.price_min) + widen * self.relax_prob
-        hi_p = american_to_prob(self.price_max) - widen * self.relax_prob
+        lo_p = american_to_prob(lo_a) + widen * self.relax_prob
+        hi_p = american_to_prob(hi_a) - widen * self.relax_prob
         lo_p = min(lo_p, 0.985)
         hi_p = max(hi_p, 0.10)
         # Returned as (most negative, least negative), matching price_min/max.
@@ -80,8 +98,14 @@ class TicketSpec:
 
 
 DEFAULT_SPECS = [
-    TicketSpec(name="Safe 20", n_legs=20, price_min=-1400, price_max=-800,
-               sports=None, min_streak=0, require_current_season=False),
+    TicketSpec(name="Safe 20", n_legs=20, price_min=-1400, price_max=-550,
+               sports=None, min_streak=0, require_current_season=False,
+               prefer="safe",
+               # Pitcher props are the only MLB market that genuinely reaches
+               # -900, so they get a heavier band and first call on the slots.
+               market_bands={"Strikeouts": [-1600, -800],
+                             "Outs Recorded": [-1600, -700]},
+               preferred_markets=["Strikeouts", "Outs Recorded"]),
     TicketSpec(name="Core 10", n_legs=10, price_min=-700, price_max=-450,
                sports=["MLB"], min_streak=0, require_current_season=True),
     TicketSpec(name="Trend 5", n_legs=5, price_min=-400, price_max=-150,
@@ -96,15 +120,16 @@ DEFAULT_SPECS = [
 def eligible(
     legs: list[Leg],
     spec: TicketSpec,
-    band: tuple[float, float],
+    step: int,
     min_streak: int,
     min_season_games: dict[str, int] | None,
 ) -> list[Leg]:
-    lo, hi = min(band), max(band)
     out = []
     for leg in legs:
         if spec.sports and leg.sport not in spec.sports:
             continue
+        band = spec.band_for(leg.market, step)
+        lo, hi = min(band), max(band)
         if not (lo <= leg.est_price <= hi):
             continue
         if leg.streak < min_streak:
@@ -119,18 +144,24 @@ def eligible(
     return out
 
 
-def best_per_player(legs: list[Leg], band: tuple[float, float]) -> list[Leg]:
+def best_per_player(legs: list[Leg], band: tuple[float, float],
+                    prefer: str = "trend",
+                    preferred_markets: list | None = None) -> list[Leg]:
     """One leg per player: the strongest opinion, not the longest ladder.
 
-    Ranked by streak first -- the user's stated preference for trend legs over
-    nominal favourites -- then confidence, then proximity to the middle of the
-    band, so a ticket doesn't cluster at one edge of its price range.
+    The ranking is what gives each ticket its character. A safe ticket wants
+    the heaviest prices it can get and treats trends as a tie-breaker; a trend
+    ticket wants the longest streaks and treats price as the tie-breaker.
     """
     centre = (american_to_prob(min(band)) + american_to_prob(max(band))) / 2
+    preferred = set(preferred_markets or [])
 
     def rank(leg: Leg):
-        return (leg.streak, leg.confidence,
-                -abs(american_to_prob(leg.est_price) - centre))
+        prob = american_to_prob(leg.est_price)
+        first = 1 if leg.market in preferred else 0
+        if prefer == "safe":
+            return (first, prob, leg.streak, leg.confidence)
+        return (first, leg.streak, leg.confidence, -abs(prob - centre))
 
     best: dict[str, Leg] = {}
     for leg in legs:
@@ -181,9 +212,10 @@ def build_ticket(
     for step in range(spec.relax_steps + 1):
         band = spec.band_at(step)
         streak = spec.streak_at(step)
-        pool = eligible(legs, spec, band, streak, min_season_games)
-        chosen = select(best_per_player(pool, band), spec.n_legs,
-                        spec.max_legs_per_game, exclude_players)
+        pool = eligible(legs, spec, step, streak, min_season_games)
+        chosen = select(
+            best_per_player(pool, band, spec.prefer, spec.preferred_markets),
+            spec.n_legs, spec.max_legs_per_game, exclude_players)
 
         if best is None or len(chosen) > best[0]:
             best = (len(chosen), chosen, step)

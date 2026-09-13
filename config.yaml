@@ -39,10 +39,21 @@ tickets:
   - name: "Safe 20"
     n_legs: 20            # DraftKings caps a parlay at 20 legs (FanDuel 25)
     price_min: -1400
-    price_max: -800       # ~89% implied and heavier
+    price_max: -550       # hitters: -550 to -700 is the honest safe range
+    prefer: "safe"        # rank by price, not by streak — safety is the point
+    # Markets don't price alike. A starter's strikeout floor really does reach
+    # -900 because his innings are predictable; no hitter prop does. So pitcher
+    # markets get their own heavier band and first call on the 20 slots.
+    market_bands:
+      Strikeouts: [-1600, -800]
+      Outs Recorded: [-1600, -700]
+    preferred_markets: ["Strikeouts", "Outs Recorded"]
     min_streak: 0
     require_current_season: false   # near-certain lines hold up in Week 1 too
     max_legs_per_game: 2
+    # With 15 games there are 30 starting pitchers, so a 20-leg ticket can be
+    # filled almost entirely from pitcher props at 2 per game. Hitter legs fill
+    # the remainder at -550/-700, which is where they honestly sit.
 
   - name: "Core 10"
     n_legs: 10
@@ -66,9 +77,14 @@ trend:
   window: 15              # rolling trend window, in games
   min_games: 8            # hard floor on sample size — no 3-game "trends"
   decay: 0.93             # per-game-back weight; 0.93 ≈ last 8 games carry ~60%
-  prior_strength: 5.0     # pseudo-games of season-long prior mixed in
+  prior_strength: 25.0    # pseudo-games of season prior. THE key dial: at 5 the
+                          # 15-game window drowned the season rate and the bot
+                          # priced a 61%-season hitter at -1010 where FanDuel
+                          # had -320. At 25 the same leg prices -303.
   league_prior: 0.55
-  max_trend_bonus: 0.18   # cap on the streak bonus, in log-odds
+  max_trend_bonus: 0.05   # cap on the streak bonus. Small on purpose: the
+                          # streak IS the hot window, already weighted above.
+  max_model_prob: 0.93    # ceiling — no player prop is a 95% certainty
   b2b_penalty: 0.12       # back-to-back / short rest
   road_penalty: 0.04
   volatility_penalty: 0.30

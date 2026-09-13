@@ -31,9 +31,10 @@ class TrendConfig:
     window: int = 15                 # rolling trend window (games)
     min_games: int = 8               # hard floor on sample size
     decay: float = 0.93              # per-game-back weight multiplier
-    prior_strength: float = 5.0      # pseudo-games of season prior
+    prior_strength: float = 25.0     # pseudo-games of season prior
     league_prior: float = 0.55       # fallback when no season sample exists
-    max_trend_bonus: float = 0.18    # cap on the streak bonus, in log-odds
+    max_trend_bonus: float = 0.05    # cap on the streak bonus, in log-odds
+    max_model_prob: float = 0.93     # no player prop is a 95% certainty
     b2b_penalty: float = 0.12        # log-odds hit for a back-to-back / short rest
     road_penalty: float = 0.04       # log-odds hit for road games
     volatility_penalty: float = 0.30 # scales the playing-time-variance penalty
@@ -200,7 +201,11 @@ def adjust(
             )
         prob = adjusted
 
-    return prob, notes
+    # Hard ceiling. Selecting the top of a scan over hundreds of player-market
+    # combinations guarantees the winners are the ones whose recent sample ran
+    # hottest, so the highest estimates are the least trustworthy ones. No
+    # player prop is a 95% certainty; refuse to print one.
+    return min(prob, cfg.max_model_prob), notes
 
 
 def confidence_score(

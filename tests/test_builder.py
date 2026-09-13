@@ -141,7 +141,7 @@ def test_sport_filter_excludes_other_sports():
     legs, _ = _legs(6)
     spec = TicketSpec(name="x", n_legs=5, price_min=-1400, price_max=-150,
                       sports=["NFL"])
-    assert eligible(legs, spec, WIDE, 0, None) == []
+    assert eligible(legs, spec, 0, 0, None) == []
 
 
 def test_current_season_requirement_filters_prior_season_legs():
@@ -151,8 +151,8 @@ def test_current_season_requirement_filters_prior_season_legs():
     strict = TicketSpec(name="x", n_legs=5, price_min=-1400, price_max=-150)
     lax = TicketSpec(name="x", n_legs=5, price_min=-1400, price_max=-150,
                      require_current_season=False)
-    assert eligible(legs, strict, WIDE, 0, None) == []
-    assert eligible(legs, lax, WIDE, 0, None) != []
+    assert eligible(legs, strict, 0, 0, None) == []
+    assert eligible(legs, lax, 0, 0, None) != []
 
 
 def test_min_season_games_is_applied_per_sport():
@@ -160,8 +160,8 @@ def test_min_season_games_is_applied_per_sport():
     for leg in legs:
         leg.current_games = 5
     spec = TicketSpec(name="x", n_legs=5, price_min=-1400, price_max=-150)
-    assert eligible(legs, spec, WIDE, 0, {"MLB": 4}) != []
-    assert eligible(legs, spec, WIDE, 0, {"MLB": 8}) == []
+    assert eligible(legs, spec, 0, 0, {"MLB": 4}) != []
+    assert eligible(legs, spec, 0, 0, {"MLB": 8}) == []
 
 
 def test_safe_ticket_ignores_the_season_sample_rule():
@@ -170,7 +170,7 @@ def test_safe_ticket_ignores_the_season_sample_rule():
     for leg in legs:
         leg.current_games = 0
         leg.prior_season_only = True
-    assert eligible(legs, SAFE, (-1400, -800), 0, {"MLB": 8}) != []
+    assert eligible(legs, SAFE, 0, 0, {"MLB": 8}) != []
 
 
 # -- the full slate ---------------------------------------------------------
@@ -218,3 +218,33 @@ def test_streak_relaxes_before_the_price_band_moves():
 def test_band_moves_immediately_when_no_streak_is_required():
     spec = TicketSpec(name="x", n_legs=20, price_min=-1400, price_max=-800)
     assert spec.band_at(1) != spec.band_at(0)
+
+
+def test_per_market_bands_override_the_ticket_band():
+    """Pitcher props get their own heavier band; hitters keep the default."""
+    spec = TicketSpec(name="x", n_legs=20, price_min=-700, price_max=-550,
+                      market_bands={"Strikeouts": [-1600, -800]})
+    assert spec.band_for("Strikeouts", 0) != spec.band_for("Hits", 0)
+    assert min(spec.band_for("Strikeouts", 0)) < min(spec.band_for("Hits", 0))
+    # An unlisted market falls back to the ticket band.
+    assert spec.band_for("Hits", 0) == spec.band_for(None, 0)
+
+
+def test_market_band_admits_a_leg_the_ticket_band_would_reject():
+    legs, _ = _legs(6)
+    for leg in legs:
+        leg.market, leg.est_price = "Strikeouts", -1200.0
+    narrow = TicketSpec(name="x", n_legs=5, price_min=-700, price_max=-550)
+    wide = TicketSpec(name="x", n_legs=5, price_min=-700, price_max=-550,
+                      market_bands={"Strikeouts": [-1600, -800]})
+    assert eligible(legs, narrow, 0, 0, None) == []
+    assert eligible(legs, wide, 0, 0, None) != []
+
+
+def test_preferred_markets_are_filled_first():
+    from parlaybot.builder import best_per_player
+    legs, _ = _legs(6)
+    for i, leg in enumerate(legs):
+        leg.market = "Strikeouts" if i % 2 else "Hits"
+    ranked = best_per_player(legs, (-1400, -150), "safe", ["Strikeouts"])
+    assert ranked[0].market == "Strikeouts", "preferred markets go first"
