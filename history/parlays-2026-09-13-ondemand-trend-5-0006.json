@@ -1,0 +1,132 @@
+[
+  {
+    "name": "Trend 5 (on-demand 00:06)",
+    "date": "2026-09-13",
+    "n_legs": 5,
+    "n_games": 5,
+    "total_american": 270,
+    "total_decimal": 3.696,
+    "model_probability": 0.20198,
+    "implied_probability": 0.27055,
+    "expected_value": 0.7465,
+    "notes": [],
+    "legs": [
+      {
+        "sport": "MLB",
+        "game": "SEA @ ATH",
+        "player": "Cal Raleigh",
+        "player_id": "663728",
+        "stat_key": "hrr",
+        "team": "SEA",
+        "market": "Hits+Runs+RBI",
+        "threshold": 1,
+        "selection": "Cal Raleigh 1+ Hits+Runs+RBI",
+        "est_price": -282,
+        "model_prob": 0.6963,
+        "raw_hit_rate": 0.8667,
+        "record": "8/8 L8 \u00b7 13/15 L15 \u00b7 69/113 season",
+        "streak": 12,
+        "opponent": "ATH",
+        "current_games": 113,
+        "prior_season_only": false,
+        "confidence": 0.874,
+        "notes": [
+          "12-game streak"
+        ]
+      },
+      {
+        "sport": "MLB",
+        "game": "LAD @ MIA",
+        "player": "Javier Sanoja",
+        "player_id": "691594",
+        "stat_key": "hrr",
+        "team": "MIA",
+        "market": "Hits+Runs+RBI",
+        "threshold": 1,
+        "selection": "Javier Sanoja 1+ Hits+Runs+RBI",
+        "est_price": -315,
+        "model_prob": 0.7158,
+        "raw_hit_rate": 0.9333,
+        "record": "8/8 L8 \u00b7 14/15 L15 \u00b7 80/131 season",
+        "streak": 12,
+        "opponent": "LAD",
+        "current_games": 131,
+        "prior_season_only": false,
+        "confidence": 0.845,
+        "notes": [
+          "12-game streak"
+        ]
+      },
+      {
+        "sport": "MLB",
+        "game": "CWS @ STL",
+        "player": "Nathan Church",
+        "player_id": "701675",
+        "stat_key": "hrr",
+        "team": "STL",
+        "market": "Hits+Runs+RBI",
+        "threshold": 1,
+        "selection": "Nathan Church 1+ Hits+Runs+RBI",
+        "est_price": -348,
+        "model_prob": 0.7326,
+        "raw_hit_rate": 0.9333,
+        "record": "8/8 L8 \u00b7 14/15 L15 \u00b7 82/129 season",
+        "streak": 11,
+        "opponent": "CWS",
+        "current_games": 129,
+        "prior_season_only": false,
+        "confidence": 0.837,
+        "notes": [
+          "11-game streak"
+        ]
+      },
+      {
+        "sport": "MLB",
+        "game": "BAL @ TOR",
+        "player": "Nathan Lukes",
+        "player_id": "664770",
+        "stat_key": "hrr",
+        "team": "TOR",
+        "market": "Hits+Runs+RBI",
+        "threshold": 1,
+        "selection": "Nathan Lukes 1+ Hits+Runs+RBI",
+        "est_price": -354,
+        "model_prob": 0.7356,
+        "raw_hit_rate": 0.8667,
+        "record": "8/8 L8 \u00b7 13/15 L15 \u00b7 75/113 season",
+        "streak": 10,
+        "opponent": "BAL",
+        "current_games": 113,
+        "prior_season_only": false,
+        "confidence": 0.87,
+        "notes": [
+          "10-game streak",
+          "volatile role"
+        ]
+      },
+      {
+        "sport": "MLB",
+        "game": "TEX @ AZ",
+        "player": "Ketel Marte",
+        "player_id": "606466",
+        "stat_key": "hits",
+        "team": "AZ",
+        "market": "Hits",
+        "threshold": 1,
+        "selection": "Ketel Marte 1+ Hits",
+        "est_price": -393,
+        "model_prob": 0.7519,
+        "raw_hit_rate": 0.8667,
+        "record": "8/8 L8 \u00b7 13/15 L15 \u00b7 87/127 season",
+        "streak": 9,
+        "opponent": "TEX",
+        "current_games": 127,
+        "prior_season_only": false,
+        "confidence": 0.891,
+        "notes": [
+          "9-game streak"
+        ]
+      }
+    ]
+  }
+]
