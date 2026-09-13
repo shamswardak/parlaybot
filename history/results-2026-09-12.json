@@ -1,0 +1,17 @@
+[
+  {
+    "name": "Max Trend",
+    "date": "2026-09-12",
+    "status": "LOSS",
+    "n_legs": 7,
+    "hits": 5,
+    "misses": 2,
+    "voids": 0,
+    "total_american": 222,
+    "model_probability": 0.20633,
+    "failed_legs": [
+      "Jeff McNeil 1+ Hits+Runs+RBI \u2014 only got 0, needed 1",
+      "Gage Jump 3+ Strikeouts \u2014 only got 2, needed 3"
+    ]
+  }
+]

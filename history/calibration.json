@@ -1,0 +1,43 @@
+{
+  "counts": {
+    "ALL:1": 2,
+    "ALL:2": 3,
+    "ALL:3": 2,
+    "MLB:1": 2,
+    "MLB:2": 3,
+    "MLB:3": 2
+  },
+  "observed": {
+    "ALL:1": {
+      "actual": 0.5,
+      "n": 2,
+      "predicted": 0.7637
+    },
+    "ALL:2": {
+      "actual": 0.6667,
+      "n": 3,
+      "predicted": 0.7934
+    },
+    "ALL:3": {
+      "actual": 1.0,
+      "n": 2,
+      "predicted": 0.8417
+    },
+    "MLB:1": {
+      "actual": 0.5,
+      "n": 2,
+      "predicted": 0.7637
+    },
+    "MLB:2": {
+      "actual": 0.6667,
+      "n": 3,
+      "predicted": 0.7934
+    },
+    "MLB:3": {
+      "actual": 1.0,
+      "n": 2,
+      "predicted": 0.8417
+    }
+  },
+  "shifts": {}
+}
