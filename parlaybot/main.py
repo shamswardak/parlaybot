@@ -1,0 +1,162 @@
+"""Entry point: gather today's slate, score trends, build tickets, notify."""
+
+from __future__ import annotations
+
+import argparse
+import logging
+import os
+import sys
+from datetime import date, datetime, timedelta
+from pathlib import Path
+
+from . import discord_out
+from .builder import build_slate
+from .config import Settings
+from .http import HttpClient
+from .models import Leg
+from .sources import SOURCES
+
+log = logging.getLogger("parlaybot")
+
+
+def collect_legs(settings: Settings, on: date, client: HttpClient
+                 ) -> tuple[list[Leg], list[str]]:
+    from .trends import build_legs_for_player
+
+    all_legs: list[Leg] = []
+    notes: list[str] = []
+
+    for sport in settings.sports:
+        source_cls = SOURCES.get(sport)
+        if source_cls is None:
+            notes.append(f"{sport}: no source implemented")
+            continue
+
+        try:
+            source = source_cls(client)
+            matchups = source.slate(on)
+        except Exception as exc:  # a dead upstream must not kill the run
+            log.exception("%s slate failed", sport)
+            notes.append(f"{sport}: slate unavailable ({exc.__class__.__name__})")
+            continue
+
+        if not matchups:
+            notes.append(f"{sport}: no games today")
+            continue
+
+        try:
+            pairs = source.players(matchups)
+        except Exception as exc:
+            log.exception("%s players failed", sport)
+            notes.append(f"{sport}: player data unavailable ({exc.__class__.__name__})")
+            continue
+
+        sport_legs: list[Leg] = []
+        for player, matchup in pairs:
+            markets = (
+                source.markets_for(player)
+                if hasattr(source, "markets_for") else source.markets
+            )
+            try:
+                sport_legs.extend(
+                    build_legs_for_player(
+                        player,
+                        markets=markets,
+                        game_id=matchup.game_id,
+                        game_label=matchup.label,
+                        is_home=source.is_home(player, matchup),
+                        short_rest=source.short_rest(player, on),
+                        cfg=settings.trend,
+                        hold=settings.market_hold,
+                        price_band=settings.price_band,
+                    )
+                )
+            except Exception:
+                log.exception("leg build failed for %s", player.name)
+
+        notes.append(
+            f"{sport}: {len(matchups)} games, {len(pairs)} players, "
+            f"{len(sport_legs)} candidate legs"
+        )
+        all_legs.extend(sport_legs)
+
+    return all_legs, notes
+
+
+def run(settings: Settings, on: date) -> int:
+    client = HttpClient()
+    legs, notes = collect_legs(settings, on, client)
+
+    if not legs:
+        log.error("no candidate legs found")
+        if settings.discord_webhook and not settings.dry_run:
+            discord_out.send(settings.discord_webhook, [], on,
+                             notes + ["No qualifying legs on today's slate."])
+        return 1
+
+    log.info("%d candidate legs across %d games",
+             len(legs), len({l.game_id for l in legs}))
+
+    parlays = build_slate(legs, settings.build, on, profiles=settings.parlays)
+    if not parlays:
+        notes.append("Slate too thin to reach the target leg count.")
+        log.error("no parlays built")
+        return 1
+
+    Path(settings.output_dir).mkdir(parents=True, exist_ok=True)
+    out_path = Path(settings.output_dir) / f"parlays-{on.isoformat()}.json"
+    discord_out.write_json(parlays, str(out_path))
+
+    text = discord_out.to_console(parlays, on, notes)
+    print(text)
+
+    if settings.dry_run:
+        log.info("dry run: not posting to Discord")
+        return 0
+
+    if not settings.discord_webhook:
+        log.error("DISCORD_WEBHOOK_URL is not set")
+        return 2
+
+    ok = discord_out.send(settings.discord_webhook, parlays, on, notes)
+    return 0 if ok else 3
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(prog="parlaybot")
+    parser.add_argument("--config", default="config.yaml")
+    parser.add_argument("--date", help="YYYY-MM-DD (defaults to today, US Eastern)")
+    parser.add_argument("--tomorrow", action="store_true",
+                        help="build for tomorrow's slate instead")
+    parser.add_argument("--dry-run", action="store_true",
+                        help="print to stdout, do not post to Discord")
+    parser.add_argument("--sports", help="comma-separated override, e.g. MLB,NFL")
+    parser.add_argument("-v", "--verbose", action="store_true")
+    args = parser.parse_args(argv)
+
+    logging.basicConfig(
+        level=logging.DEBUG if args.verbose else logging.INFO,
+        format="%(asctime)s %(levelname)-7s %(name)s: %(message)s",
+        stream=sys.stderr,
+    )
+
+    settings = Settings.load(args.config)
+    if args.dry_run:
+        settings.dry_run = True
+    if args.sports:
+        settings.sports = [s.strip().upper() for s in args.sports.split(",")]
+
+    if args.date:
+        on = datetime.strptime(args.date, "%Y-%m-%d").date()
+    else:
+        # Sports "days" are US Eastern; the runner's clock may be UTC.
+        os.environ.setdefault("TZ", "America/New_York")
+        on = date.today()
+        if args.tomorrow:
+            on += timedelta(days=1)
+
+    return run(settings, on)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
