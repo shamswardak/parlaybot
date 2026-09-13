@@ -2,9 +2,9 @@ name: Daily parlays
 
 on:
   schedule:
-    # 14:00 UTC = 10:00 ET. Grades yesterday first, then builds today's tickets
-    # so the build picks up the freshly refitted calibration.
-    - cron: "0 14 * * *"
+    # 16:00 UTC = 12:00 PM ET (daylight saving). Becomes 11am ET in November —
+    # change to "0 17 * * *" then if you want to hold noon year round.
+    - cron: "0 16 * * *"
   workflow_dispatch:
     inputs:
       sports:
