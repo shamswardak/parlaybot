@@ -36,6 +36,7 @@ class Settings:
     discord_ondemand_webhook: str = ""
     use_calibration: bool = True
     dry_run: bool = False
+    sports_overridden: bool = False
     output_dir: str = "output"
     history_dir: str = "history"
 
@@ -82,4 +83,5 @@ class Settings:
                 s.strip().upper()
                 for s in os.environ["PARLAYBOT_SPORTS"].split(",") if s.strip()
             ]
+            settings.sports_overridden = True
         return settings

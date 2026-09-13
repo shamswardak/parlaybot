@@ -161,8 +161,20 @@ def run(settings: Settings, on: date, ticket: str | None = None,
     log.info("%d candidate legs across %d games",
              len(legs), len({l.game_id for l in legs}))
 
+    # Asking for one sport specifically is a decision, not an accident: honour
+    # it even where that sport has too little current-season form to clear the
+    # usual sample rule. The ticket still says the legs are thin.
+    waive = settings.sports_overridden and len(settings.sports) == 1
+    if waive:
+        notes.append(
+            f"{settings.sports[0]} selected on its own — the current-season "
+            f"sample rule is waived for this run, so legs may rest on thin or "
+            f"last-season form."
+        )
+
     parlays = build_slate(legs, specs, on,
-                          min_season_games=settings.min_season_games)
+                          min_season_games=settings.min_season_games,
+                          waive_sample=waive)
     if not parlays:
         msg = (f"Only {len({l.game_id for l in legs})} games available — not "
                f"enough legs met any ticket's criteria.")
@@ -232,6 +244,7 @@ def main(argv: list[str] | None = None) -> int:
         settings.dry_run = True
     if args.sports:
         settings.sports = [s.strip().upper() for s in args.sports.split(",")]
+        settings.sports_overridden = True
 
     if args.date:
         on = datetime.strptime(args.date, "%Y-%m-%d").date()

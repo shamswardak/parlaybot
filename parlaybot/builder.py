@@ -63,6 +63,11 @@ class TicketSpec:
     market_bands: dict = field(default_factory=dict)
     # Markets to fill from first when everything else is equal.
     preferred_markets: list = field(default_factory=list)
+    # Sports to fill from first. Not a restriction -- a preference. MLB leads
+    # because it has months of current-season form behind every leg, where an
+    # NFL leg in September has almost none. When MLB runs out, or when the run
+    # is pointed at another sport, the rest fill in behind it.
+    preferred_sports: list = field(default_factory=list)
     # Accept legs whose trend window is missing an unfinished game. Only
     # safe tickets should: there the price carries the risk, whereas a
     # trend ticket built on a streak that may already be broken is
@@ -113,9 +118,11 @@ DEFAULT_SPECS = [
                preferred_markets=["Strikeouts", "Outs Recorded"],
                allow_stale_trend=True),
     TicketSpec(name="Core 10", n_legs=10, price_min=-700, price_max=-450,
-               sports=["MLB"], min_streak=0, require_current_season=True),
+               min_streak=0, require_current_season=True,
+               preferred_sports=["MLB"]),
     TicketSpec(name="Trend 5", n_legs=5, price_min=-400, price_max=-150,
-               sports=["MLB"], min_streak=5, require_current_season=True),
+               min_streak=5, require_current_season=True,
+               preferred_sports=["MLB"]),
 ]
 
 
@@ -129,7 +136,15 @@ def eligible(
     step: int,
     min_streak: int,
     min_season_games: dict[str, int] | None,
+    waive_sample: bool = False,
 ) -> list[Leg]:
+    """Legs meeting this ticket's criteria at this relaxation step.
+
+    `waive_sample` drops the current-season sample requirement. It is set when
+    the run has been pointed at one sport deliberately: asking for NFL in
+    Week 1 and being handed nothing is a worse answer than being handed thin
+    legs that say they are thin.
+    """
     out = []
     for leg in legs:
         if spec.sports and leg.sport not in spec.sports:
@@ -142,7 +157,7 @@ def eligible(
             continue
         if leg.stale_trend and not spec.allow_stale_trend:
             continue
-        if spec.require_current_season:
+        if spec.require_current_season and not waive_sample:
             if leg.prior_season_only:
                 continue
             floor = (min_season_games or {}).get(leg.sport, 0)
@@ -154,7 +169,8 @@ def eligible(
 
 def best_per_player(legs: list[Leg], band: tuple[float, float],
                     prefer: str = "trend",
-                    preferred_markets: list | None = None) -> list[Leg]:
+                    preferred_markets: list | None = None,
+                    preferred_sports: list | None = None) -> list[Leg]:
     """One leg per player: the strongest opinion, not the longest ladder.
 
     The ranking is what gives each ticket its character. A safe ticket wants
@@ -163,13 +179,16 @@ def best_per_player(legs: list[Leg], band: tuple[float, float],
     """
     centre = (american_to_prob(min(band)) + american_to_prob(max(band))) / 2
     preferred = set(preferred_markets or [])
+    sports_first = set(preferred_sports or [])
 
     def rank(leg: Leg):
         prob = american_to_prob(leg.est_price)
+        # Sport leads, then market, then the ticket's own character.
+        sport = 1 if leg.sport in sports_first else 0
         first = 1 if leg.market in preferred else 0
         if prefer == "safe":
-            return (first, prob, leg.streak, leg.confidence)
-        return (first, leg.streak, leg.confidence, -abs(prob - centre))
+            return (sport, first, prob, leg.streak, leg.confidence)
+        return (sport, first, leg.streak, leg.confidence, -abs(prob - centre))
 
     best: dict[str, Leg] = {}
     for leg in legs:
@@ -212,6 +231,7 @@ def build_ticket(
     slate_date: date,
     exclude_players: set[str] | None = None,
     min_season_games: dict[str, int] | None = None,
+    waive_sample: bool = False,
 ) -> Parlay | None:
     """Fill one ticket, loosening the criteria a step at a time if short."""
     exclude_players = exclude_players or set()
@@ -220,9 +240,10 @@ def build_ticket(
     for step in range(spec.relax_steps + 1):
         band = spec.band_at(step)
         streak = spec.streak_at(step)
-        pool = eligible(legs, spec, step, streak, min_season_games)
+        pool = eligible(legs, spec, step, streak, min_season_games, waive_sample)
         chosen = select(
-            best_per_player(pool, band, spec.prefer, spec.preferred_markets),
+            best_per_player(pool, band, spec.prefer, spec.preferred_markets,
+                            spec.preferred_sports),
             spec.n_legs, spec.max_legs_per_game, exclude_players)
 
         if best is None or len(chosen) > best[0]:
@@ -272,6 +293,7 @@ def build_slate(
     slate_date: date,
     min_season_games: dict[str, int] | None = None,
     share_players: bool = False,
+    waive_sample: bool = False,
 ) -> list[Parlay]:
     """Build every ticket for the day.
 
@@ -285,6 +307,7 @@ def build_slate(
             legs, spec, slate_date,
             exclude_players=set() if share_players else set(used),
             min_season_games=min_season_games,
+            waive_sample=waive_sample,
         )
         if ticket is None:
             log.warning("could not build %s", spec.name)

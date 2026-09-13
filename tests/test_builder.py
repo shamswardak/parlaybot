@@ -269,3 +269,40 @@ def test_default_safe_ticket_tolerates_stale_trends_and_others_do_not():
     assert DEFAULT_SPECS[0].allow_stale_trend is True
     assert DEFAULT_SPECS[1].allow_stale_trend is False
     assert DEFAULT_SPECS[2].allow_stale_trend is False
+
+
+def test_tickets_are_no_longer_pinned_to_one_sport():
+    for spec in DEFAULT_SPECS:
+        assert spec.sports is None, f"{spec.name} should not restrict sports"
+
+
+def test_mlb_is_preferred_but_not_required():
+    """MLB fills first; other sports fill behind it rather than being excluded."""
+    from parlaybot.builder import best_per_player
+    legs, _ = _legs(6)
+    for i, leg in enumerate(legs):
+        leg.sport = "NFL" if i % 2 else "MLB"
+    ranked = best_per_player(legs, WIDE, "trend", None, ["MLB"])
+    assert ranked[0].sport == "MLB"
+    assert any(l.sport == "NFL" for l in ranked), "NFL must still be available"
+
+
+def test_waiving_the_sample_rule_lets_a_thin_sport_through():
+    """Choosing NFL on its own should produce legs even in Week 1."""
+    legs, _ = _legs(6)
+    for leg in legs:
+        leg.sport, leg.current_games, leg.prior_season_only = "NFL", 0, True
+    spec = TicketSpec(name="x", n_legs=5, price_min=-1400, price_max=-150,
+                      require_current_season=True)
+    assert eligible(legs, spec, 0, 0, {"NFL": 4}) == []
+    assert eligible(legs, spec, 0, 0, {"NFL": 4}, waive_sample=True) != []
+
+
+def test_waiver_does_not_bypass_price_or_streak_criteria():
+    """It relaxes the sample rule only — the ticket's own shape still holds."""
+    legs, _ = _legs(6)
+    for leg in legs:
+        leg.sport, leg.current_games, leg.prior_season_only = "NFL", 0, True
+        leg.est_price = -2000.0
+    spec = TicketSpec(name="x", n_legs=5, price_min=-700, price_max=-450)
+    assert eligible(legs, spec, 0, 0, None, waive_sample=True) == []
