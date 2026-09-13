@@ -54,9 +54,15 @@ def test_chunker_never_drops_or_duplicates_embeds():
     assert flat == fake
 
 
+def _ticket_embeds(embeds):
+    """Ticket embeds only — the copy-slip embeds are interleaved with them."""
+    return [e for e in embeds if "fields" in e]
+
+
 def test_every_leg_appears_in_its_embed():
     parlays = _parlays()
-    embeds = build_embeds(parlays, date.today(), [])
+    embeds = _ticket_embeds(build_embeds(parlays, date.today(), []))
+    assert len(embeds) == len(parlays)
     for parlay, embed in zip(parlays, embeds):
         for leg in parlay.legs:
             assert leg.player in embed["description"]
@@ -78,7 +84,29 @@ def test_console_output_lists_every_leg():
 
 def test_sgp_warning_present_when_games_are_doubled():
     parlays = _parlays()
-    embeds = build_embeds(parlays, date.today(), [])
+    embeds = _ticket_embeds(build_embeds(parlays, date.today(), []))
     for parlay, embed in zip(parlays, embeds):
         names = [f["name"] for f in embed["fields"]]
         assert ("⚠️ Same-game legs" in names) == bool(parlay.sgp_legs)
+
+
+def test_playbook_line_lists_every_leg():
+    from parlaybot.discord_out import playbook_line
+    p = _parlays()[0]
+    line = playbook_line(p)
+    assert line.count(",") == len(p.legs) - 1
+    for leg in p.legs:
+        assert leg.player in line
+    # Combination markets must be spelled out, not left as our compact labels.
+    assert "Hits+Runs+RBI" not in line
+
+
+def test_playbook_embed_is_present_and_copyable():
+    from parlaybot.discord_out import build_embeds
+    parlays = _parlays()
+    embeds = build_embeds(parlays, date.today(), [])
+    slips = [e for e in embeds if "copy into a slip builder" in e.get("title", "")]
+    assert len(slips) == len(parlays)
+    for e in slips:
+        assert "```" in e["description"]
+        assert len(e["description"]) <= MAX_TOTAL_CHARS

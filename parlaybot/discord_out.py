@@ -15,6 +15,30 @@ log = logging.getLogger(__name__)
 
 SPORT_EMOJI = {"MLB": "⚾", "NFL": "🏈", "NBA": "🏀", "NHL": "🏒"}
 
+# Our market labels are compact for the picks list; bet-slip builders parse
+# natural phrasing better, so spell the combination markets out.
+PLAYBOOK_MARKET = {
+    "Hits+Runs+RBI": "hits + runs + RBIs",
+    "Pts+Reb+Ast": "points + rebounds + assists",
+    "3-Pointers Made": "three pointers made",
+    "Outs Recorded": "outs recorded",
+    "Shots on Goal": "shots on goal",
+}
+
+
+def playbook_line(parlay: "Parlay") -> str:
+    """One comma-separated string of every selection, for a slip builder.
+
+    Paste target is Playbook (actionnetwork.com/playbook), which turns a list
+    like this into a prefilled DraftKings/FanDuel slip. Nothing here is
+    specific to that service though -- it's just the ticket in plain words.
+    """
+    parts = []
+    for leg in parlay.legs:
+        market = PLAYBOOK_MARKET.get(leg.market, leg.market.lower())
+        parts.append(f"{leg.player} {leg.threshold:g}+ {market}")
+    return ", ".join(parts)
+
 COLOR_GOOD = 0x2ECC71
 COLOR_WARN = 0xE67E22
 COLOR_BAD = 0xE74C3C
@@ -130,6 +154,23 @@ def build_embeds(parlays: list[Parlay], slate: date, notes: list[str]) -> list[d
                 "where the posted price is LONGER than the estimate. "
                 "Run price_check.py with the prices you actually get."
             )},
+        })
+
+        # Its own embed: a fenced block renders with a copy button on mobile,
+        # and 20 legs would blow past a field's 1024-character cap.
+        slip = playbook_line(parlay)
+        if len(slip) > MAX_DESCRIPTION - 200:
+            slip = slip[: MAX_DESCRIPTION - 220] + " …"
+        embeds.append({
+            "title": f"📋 {parlay.name} — copy into a slip builder",
+            "description": (
+                f"```\n{slip}\n```\n"
+                "Paste into [Playbook](https://www.actionnetwork.com/playbook) "
+                "to get a prefilled DraftKings/FanDuel slip. "
+                "**Check every price before you submit** — the odds above are "
+                "estimates, not quotes."
+            ),
+            "color": 0x7289DA,
         })
 
     if notes:
