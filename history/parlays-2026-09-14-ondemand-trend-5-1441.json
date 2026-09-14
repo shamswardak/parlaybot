@@ -1,0 +1,138 @@
+[
+  {
+    "name": "Trend 5 (on-demand 14:41)",
+    "date": "2026-09-14",
+    "n_legs": 5,
+    "n_games": 5,
+    "total_american": 267,
+    "total_decimal": 3.673,
+    "model_probability": 0.20359,
+    "implied_probability": 0.27228,
+    "expected_value": 0.7477,
+    "notes": [],
+    "legs": [
+      {
+        "sport": "MLB",
+        "game": "SEA @ LAA",
+        "player": "Cal Raleigh",
+        "player_id": "663728",
+        "stat_key": "hrr",
+        "team": "SEA",
+        "market": "Hits+Runs+RBI",
+        "threshold": 1,
+        "selection": "Cal Raleigh 1+ Hits+Runs+RBI",
+        "est_price": -311,
+        "model_prob": 0.7141,
+        "raw_hit_rate": 0.9333,
+        "record": "8/8 L8 \u00b7 14/15 L15 \u00b7 71/115 season",
+        "streak": 14,
+        "opponent": "LAA",
+        "current_games": 115,
+        "prior_season_only": false,
+        "stale_trend": false,
+        "confidence": 0.839,
+        "notes": [
+          "14-game streak"
+        ]
+      },
+      {
+        "sport": "MLB",
+        "game": "MIA @ AZ",
+        "player": "Javier Sanoja",
+        "player_id": "691594",
+        "stat_key": "hrr",
+        "team": "MIA",
+        "market": "Hits+Runs+RBI",
+        "threshold": 1,
+        "selection": "Javier Sanoja 1+ Hits+Runs+RBI",
+        "est_price": -305,
+        "model_prob": 0.7106,
+        "raw_hit_rate": 0.9333,
+        "record": "8/8 L8 \u00b7 14/15 L15 \u00b7 81/132 season",
+        "streak": 13,
+        "opponent": "AZ",
+        "current_games": 132,
+        "prior_season_only": false,
+        "stale_trend": false,
+        "confidence": 0.841,
+        "notes": [
+          "13-game streak"
+        ]
+      },
+      {
+        "sport": "MLB",
+        "game": "SF @ STL",
+        "player": "Nathan Church",
+        "player_id": "701675",
+        "stat_key": "hrr",
+        "team": "STL",
+        "market": "Hits+Runs+RBI",
+        "threshold": 1,
+        "selection": "Nathan Church 1+ Hits+Runs+RBI",
+        "est_price": -354,
+        "model_prob": 0.7355,
+        "raw_hit_rate": 0.9333,
+        "record": "8/8 L8 \u00b7 14/15 L15 \u00b7 83/130 season",
+        "streak": 12,
+        "opponent": "SF",
+        "current_games": 130,
+        "prior_season_only": false,
+        "stale_trend": false,
+        "confidence": 0.852,
+        "notes": [
+          "12-game streak"
+        ]
+      },
+      {
+        "sport": "MLB",
+        "game": "DET @ TOR",
+        "player": "Nathan Lukes",
+        "player_id": "664770",
+        "stat_key": "hrr",
+        "team": "TOR",
+        "market": "Hits+Runs+RBI",
+        "threshold": 1,
+        "selection": "Nathan Lukes 1+ Hits+Runs+RBI",
+        "est_price": -355,
+        "model_prob": 0.736,
+        "raw_hit_rate": 0.8667,
+        "record": "8/8 L8 \u00b7 13/15 L15 \u00b7 76/114 season",
+        "streak": 11,
+        "opponent": "DET",
+        "current_games": 114,
+        "prior_season_only": false,
+        "stale_trend": false,
+        "confidence": 0.861,
+        "notes": [
+          "11-game streak",
+          "volatile role"
+        ]
+      },
+      {
+        "sport": "MLB",
+        "game": "CWS @ CLE",
+        "player": "Sean Newcomb",
+        "player_id": "656794",
+        "stat_key": "outs",
+        "team": "CWS",
+        "market": "Outs Recorded",
+        "threshold": 4,
+        "selection": "Sean Newcomb 4+ Outs Recorded",
+        "est_price": -366,
+        "model_prob": 0.7411,
+        "raw_hit_rate": 0.8667,
+        "record": "8/8 L8 \u00b7 13/15 L15 \u00b7 37/54 season",
+        "streak": 10,
+        "opponent": "CLE",
+        "current_games": 54,
+        "prior_season_only": false,
+        "stale_trend": false,
+        "confidence": 0.868,
+        "notes": [
+          "10-game streak",
+          "volatile role"
+        ]
+      }
+    ]
+  }
+]
