@@ -1,0 +1,112 @@
+[
+  {
+    "name": "Core 10 (on-demand 00:54)",
+    "date": "2026-09-13",
+    "status": "LOSS",
+    "n_legs": 10,
+    "hits": 8,
+    "misses": 2,
+    "voids": 0,
+    "total_american": 389,
+    "model_probability": 0.11427,
+    "failed_legs": [
+      "Javonte Williams 45+ Rushing Yards \u2014 only got 41, needed 45",
+      "Jalen Hurts 15+ Completions \u2014 only got 14, needed 15"
+    ]
+  },
+  {
+    "name": "Core 10 (on-demand 00:56)",
+    "date": "2026-09-13",
+    "status": "LOSS",
+    "n_legs": 10,
+    "hits": 8,
+    "misses": 1,
+    "voids": 1,
+    "total_american": 456,
+    "model_probability": 0.10044,
+    "failed_legs": [
+      "Cody Bellinger 1+ Hits+Runs+RBI \u2014 only got 0, needed 1"
+    ]
+  },
+  {
+    "name": "Trend 5 (on-demand 00:06)",
+    "date": "2026-09-13",
+    "status": "WIN",
+    "n_legs": 5,
+    "hits": 5,
+    "misses": 0,
+    "voids": 0,
+    "total_american": 270,
+    "model_probability": 0.20198,
+    "failed_legs": []
+  },
+  {
+    "name": "Trend 5 (on-demand 00:21)",
+    "date": "2026-09-13",
+    "status": "LOSS",
+    "n_legs": 5,
+    "hits": 3,
+    "misses": 2,
+    "voids": 0,
+    "total_american": 275,
+    "model_probability": 0.199,
+    "failed_legs": [
+      "A.J. Ewing 1+ Hits+Runs+RBI \u2014 only got 0, needed 1",
+      "Jackson Chourio 2+ Hits+Runs+RBI \u2014 only got 0, needed 2"
+    ]
+  },
+  {
+    "name": "Trend 5 (on-demand 00:41)",
+    "date": "2026-09-13",
+    "status": "LOSS",
+    "n_legs": 5,
+    "hits": 4,
+    "misses": 1,
+    "voids": 0,
+    "total_american": 289,
+    "model_probability": 0.19181,
+    "failed_legs": [
+      "A.J. Ewing 1+ Hits+Runs+RBI \u2014 only got 0, needed 1"
+    ]
+  },
+  {
+    "name": "Safe 20",
+    "date": "2026-09-13",
+    "status": "LOSS",
+    "n_legs": 18,
+    "hits": 16,
+    "misses": 1,
+    "voids": 1,
+    "total_american": 513,
+    "model_probability": 0.05712,
+    "failed_legs": [
+      "Jauan Jennings 2+ Receptions \u2014 only got 0, needed 2"
+    ]
+  },
+  {
+    "name": "Core 10",
+    "date": "2026-09-13",
+    "status": "PENDING",
+    "n_legs": 8,
+    "hits": 7,
+    "misses": 0,
+    "voids": 1,
+    "total_american": 451,
+    "model_probability": 0.1139,
+    "failed_legs": []
+  },
+  {
+    "name": "Trend 5",
+    "date": "2026-09-13",
+    "status": "LOSS",
+    "n_legs": 3,
+    "hits": 2,
+    "misses": 1,
+    "voids": 0,
+    "total_american": 140,
+    "model_probability": 0.35046,
+    "failed_legs": [
+      "Xander Bogaerts 1+ Hits+Runs+RBI \u2014 only got 0, needed 1"
+    ]
+  }
+]
