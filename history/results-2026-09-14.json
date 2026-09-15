@@ -1,0 +1,63 @@
+[
+  {
+    "name": "Trend 5 (on-demand 14:41)",
+    "date": "2026-09-14",
+    "status": "LOSS",
+    "n_legs": 5,
+    "hits": 3,
+    "misses": 2,
+    "voids": 0,
+    "total_american": 267,
+    "model_probability": 0.20359,
+    "failed_legs": [
+      "Nathan Church 1+ Hits+Runs+RBI \u2014 only got 0, needed 1",
+      "Sean Newcomb 4+ Outs Recorded \u2014 only got 3, needed 4"
+    ]
+  },
+  {
+    "name": "Safe 20",
+    "date": "2026-09-14",
+    "status": "LOSS",
+    "n_legs": 20,
+    "hits": 13,
+    "misses": 7,
+    "voids": 0,
+    "total_american": 793,
+    "model_probability": 0.03492,
+    "failed_legs": [
+      "Marvin Mims Jr. 1+ Receptions \u2014 only got 0, needed 1",
+      "Mookie Betts 1+ Hits+Runs+RBI \u2014 only got 0, needed 1",
+      "Casey Mize 2+ Strikeouts \u2014 only got 0, needed 2",
+      "Troy Melton 16+ Outs Recorded \u2014 only got 8, needed 16",
+      "Rashee Rice 35+ Receiving Yards \u2014 only got 19, needed 35",
+      "Otto Lopez 1+ Hits+Runs+RBI \u2014 only got 0, needed 1",
+      "Sal Stewart 1+ Hits+Runs+RBI \u2014 only got 0, needed 1"
+    ]
+  },
+  {
+    "name": "Core 10",
+    "date": "2026-09-14",
+    "status": "WIN",
+    "n_legs": 10,
+    "hits": 10,
+    "misses": 0,
+    "voids": 0,
+    "total_american": 441,
+    "model_probability": 0.10315,
+    "failed_legs": []
+  },
+  {
+    "name": "Trend 5",
+    "date": "2026-09-14",
+    "status": "LOSS",
+    "n_legs": 5,
+    "hits": 4,
+    "misses": 1,
+    "voids": 0,
+    "total_american": 286,
+    "model_probability": 0.1936,
+    "failed_legs": [
+      "Nathan Church 1+ Hits+Runs+RBI \u2014 only got 0, needed 1"
+    ]
+  }
+]
