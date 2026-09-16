@@ -1,69 +1,69 @@
 {
   "counts": {
-    "ALL:0": 1,
-    "ALL:1": 25,
-    "ALL:2": 37,
-    "ALL:3": 17,
-    "ALL:4": 13,
-    "MLB:0": 1,
-    "MLB:1": 25,
-    "MLB:2": 27,
-    "MLB:3": 16,
-    "MLB:4": 3,
+    "ALL:0": 2,
+    "ALL:1": 31,
+    "ALL:2": 47,
+    "ALL:3": 29,
+    "ALL:4": 19,
+    "MLB:0": 2,
+    "MLB:1": 31,
+    "MLB:2": 37,
+    "MLB:3": 28,
+    "MLB:4": 9,
     "NFL:2": 10,
     "NFL:3": 1,
     "NFL:4": 10
   },
   "observed": {
     "ALL:0": {
-      "actual": 1.0,
-      "n": 1,
-      "predicted": 0.6963
+      "actual": 0.5,
+      "n": 2,
+      "predicted": 0.6606
     },
     "ALL:1": {
-      "actual": 0.76,
-      "n": 25,
-      "predicted": 0.7409
+      "actual": 0.7419,
+      "n": 31,
+      "predicted": 0.7408
     },
     "ALL:2": {
-      "actual": 0.8108,
-      "n": 37,
-      "predicted": 0.8036
+      "actual": 0.8085,
+      "n": 47,
+      "predicted": 0.8056
     },
     "ALL:3": {
-      "actual": 0.8824,
-      "n": 17,
-      "predicted": 0.8501
+      "actual": 0.8966,
+      "n": 29,
+      "predicted": 0.8512
     },
     "ALL:4": {
-      "actual": 0.7692,
-      "n": 13,
-      "predicted": 0.8752
+      "actual": 0.7895,
+      "n": 19,
+      "predicted": 0.8758
     },
     "MLB:0": {
-      "actual": 1.0,
-      "n": 1,
-      "predicted": 0.6963
+      "actual": 0.5,
+      "n": 2,
+      "predicted": 0.6606
     },
     "MLB:1": {
-      "actual": 0.76,
-      "n": 25,
-      "predicted": 0.7409
+      "actual": 0.7419,
+      "n": 31,
+      "predicted": 0.7408
     },
     "MLB:2": {
-      "actual": 0.8148,
-      "n": 27,
-      "predicted": 0.8031
+      "actual": 0.8108,
+      "n": 37,
+      "predicted": 0.8058
     },
     "MLB:3": {
-      "actual": 0.875,
-      "n": 16,
-      "predicted": 0.8513
+      "actual": 0.8929,
+      "n": 28,
+      "predicted": 0.8519
     },
     "MLB:4": {
-      "actual": 1.0,
-      "n": 3,
-      "predicted": 0.8732
+      "actual": 0.8889,
+      "n": 9,
+      "predicted": 0.8758
     },
     "NFL:2": {
       "actual": 0.8,

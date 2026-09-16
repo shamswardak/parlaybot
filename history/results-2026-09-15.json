@@ -1,0 +1,48 @@
+[
+  {
+    "name": "Safe 20",
+    "date": "2026-09-15",
+    "status": "LOSS",
+    "n_legs": 20,
+    "hits": 17,
+    "misses": 3,
+    "voids": 0,
+    "total_american": 576,
+    "model_probability": 0.04613,
+    "failed_legs": [
+      "Foster Griffin 14+ Outs Recorded \u2014 only got 12, needed 14",
+      "Shane Baz 15+ Outs Recorded \u2014 only got 12, needed 15",
+      "Mike Trout 1+ Hits+Runs+RBI \u2014 only got 0, needed 1"
+    ]
+  },
+  {
+    "name": "Core 10",
+    "date": "2026-09-15",
+    "status": "LOSS",
+    "n_legs": 10,
+    "hits": 8,
+    "misses": 2,
+    "voids": 0,
+    "total_american": 405,
+    "model_probability": 0.11051,
+    "failed_legs": [
+      "Josh Jung 1+ Hits+Runs+RBI \u2014 only got 0, needed 1",
+      "James Wood 1+ Hits+Runs+RBI \u2014 only got 0, needed 1"
+    ]
+  },
+  {
+    "name": "Trend 5",
+    "date": "2026-09-15",
+    "status": "LOSS",
+    "n_legs": 5,
+    "hits": 3,
+    "misses": 2,
+    "voids": 0,
+    "total_american": 341,
+    "model_probability": 0.16976,
+    "failed_legs": [
+      "Cal Raleigh 1+ Hits+Runs+RBI \u2014 only got 0, needed 1",
+      "Victor Mesa Jr. 1+ Hits+Runs+RBI \u2014 only got 0, needed 1"
+    ]
+  }
+]
