@@ -2,12 +2,11 @@ name: Daily parlays
 
 on:
   schedule:
-    # 13:00 UTC = 9:00 AM ET (8:00 AM once EST starts in November).
-    # Deliberately early: GitHub's scheduler queue runs hours late, and the
-    # bot prices from its own model rather than live odds, so there is no
-    # reason to wait for the market. Nine gives ~3 hours of drift before the
-    # 1:05 first pitches, which is what a weekend slate lives or dies on.
-    - cron: "0 13 * * *"
+    # Five firings, not one. GitHub's scheduler queue runs 2-4 hours late and
+    # sometimes drops a firing entirely (Sep 15 never ran). Whichever of these
+    # GitHub actually starts first does the build; the rest see today's ticket
+    # already in history/ and exit in seconds. 13:00-17:00 UTC = 9 AM - 1 PM ET.
+    - cron: "0 13,14,15,16,17 * * *"
   workflow_dispatch:
     inputs:
       sport:
@@ -28,8 +27,9 @@ on:
         default: true
 
 concurrency:
-  # Separate lanes per trigger. With one shared group, a manual run left
-  # hanging blocks every scheduled run behind it, since nothing is cancelled.
+  # Separate lanes per trigger, so a hung manual run can't block the schedule.
+  # Within the schedule lane the firings serialize, which is what makes the
+  # "already built" check below reliable.
   group: daily-parlays-${{ github.event_name }}
   cancel-in-progress: false
 
@@ -43,13 +43,45 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Should this firing build?
+        id: guard
+        env:
+          TZ: America/New_York
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "manual run — always builds"
+            echo "build=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          TODAY=$(date +%F)
+          HOUR=$((10#$(date +%H)))
+          if [ -f "history/parlays-$TODAY.json" ]; then
+            echo "$TODAY already built by an earlier firing — nothing to do"
+            echo "build=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          # Lineups post a few hours before first pitch. Before 11 ET the
+          # source falls back to the active roster, which means guessing at
+          # who actually plays. Let a later firing take it instead.
+          if [ "$HOUR" -lt 11 ]; then
+            echo "only ${HOUR}:00 ET — too early for confirmed lineups, skipping"
+            echo "build=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          echo "building for $TODAY at ${HOUR}:00 ET"
+          echo "build=true" >> $GITHUB_OUTPUT
+
       - uses: actions/setup-python@v5
+        if: steps.guard.outputs.build == 'true'
         with:
           python-version: "3.11"
           cache: pip
       - run: pip install -r requirements.txt
+        if: steps.guard.outputs.build == 'true'
 
       - name: Restore data cache
+        if: steps.guard.outputs.build == 'true'
         uses: actions/cache@v4
         with:
           path: .cache
@@ -58,7 +90,7 @@ jobs:
             parlaybot-cache-
 
       - name: Grade previous slates
-        if: ${{ github.event_name == 'schedule' || github.event.inputs.skip_grade != 'true' }}
+        if: ${{ steps.guard.outputs.build == 'true' && (github.event_name == 'schedule' || github.event.inputs.skip_grade != 'true') }}
         continue-on-error: true
         env:
           DISCORD_RESULTS_WEBHOOK_URL: ${{ secrets.DISCORD_RESULTS_WEBHOOK_URL }}
@@ -66,6 +98,7 @@ jobs:
         run: python -m parlaybot.grade_main
 
       - name: Build and send
+        if: steps.guard.outputs.build == 'true'
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           DISCORD_ONDEMAND_WEBHOOK_URL: ${{ secrets.DISCORD_ONDEMAND_WEBHOOK_URL }}
@@ -92,7 +125,7 @@ jobs:
           eval python -m parlaybot.main $ARGS
 
       - name: Commit history
-        if: ${{ github.event.inputs.dry_run != 'true' }}
+        if: ${{ steps.guard.outputs.build == 'true' && github.event.inputs.dry_run != 'true' }}
         run: |
           git config user.name "parlaybot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
