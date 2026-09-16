@@ -107,22 +107,13 @@ class TicketSpec:
         return max(0, self.min_streak - used * self.relax_streak)
 
 
+# Fallback only -- config.yaml defines the real tickets. Kept in step with it
+# so that a missing or unreadable config degrades to today's behaviour rather
+# than silently resurrecting the retired three-ticket setup.
 DEFAULT_SPECS = [
-    TicketSpec(name="Safe 20", n_legs=20, price_min=-1400, price_max=-550,
-               sports=None, min_streak=0, require_current_season=False,
-               prefer="safe",
-               # Pitcher props are the only MLB market that genuinely reaches
-               # -900, so they get a heavier band and first call on the slots.
-               market_bands={"Strikeouts": [-1600, -800],
-                             "Outs Recorded": [-1600, -700]},
-               preferred_markets=["Strikeouts", "Outs Recorded"],
-               allow_stale_trend=True),
-    TicketSpec(name="Core 10", n_legs=10, price_min=-700, price_max=-450,
+    TicketSpec(name="Daily Ticket", n_legs=10, price_min=-700, price_max=-450,
                min_streak=0, require_current_season=True,
-               preferred_sports=["MLB"]),
-    TicketSpec(name="Trend 5", n_legs=5, price_min=-400, price_max=-150,
-               min_streak=5, require_current_season=True,
-               preferred_sports=["MLB"]),
+               preferred_sports=["MLB"], relax_steps=2),
 ]
 
 

@@ -187,13 +187,19 @@ def test_slate_builds_every_ticket_without_sharing_players():
 
 
 def test_default_specs_match_the_agreed_shape():
-    names = [s.name for s in DEFAULT_SPECS]
-    counts = [s.n_legs for s in DEFAULT_SPECS]
-    assert counts == [20, 10, 5]
-    assert names[0].startswith("Safe")
-    assert DEFAULT_SPECS[0].require_current_season is False
-    assert DEFAULT_SPECS[2].min_streak == 5
-    assert DEFAULT_SPECS[0].n_legs <= 20, "DraftKings caps parlays at 20 legs"
+    """One ticket a day. Safe 20 and Trend 5 were retired on the record:
+    both sat below their break-even, and Safe 20 could not clear it at any
+    per-leg accuracy because twenty legs compounds the error."""
+    assert len(DEFAULT_SPECS) == 1, "the schedule builds exactly one ticket"
+    spec = DEFAULT_SPECS[0]
+    assert spec.name == "Daily Ticket"
+    assert spec.n_legs == 10
+    assert spec.n_legs <= 20, "DraftKings caps parlays at 20 legs"
+    assert spec.require_current_season is True
+    assert spec.relax_steps == 2, (
+        "five passes stretched the band to -314/-1438, which is no longer the "
+        "ticket these criteria describe"
+    )
 
 
 def test_average_leg_price_is_probability_weighted():
@@ -265,10 +271,11 @@ def test_stale_trend_legs_are_kept_off_trend_tickets():
     )
 
 
-def test_default_safe_ticket_tolerates_stale_trends_and_others_do_not():
-    assert DEFAULT_SPECS[0].allow_stale_trend is True
-    assert DEFAULT_SPECS[1].allow_stale_trend is False
-    assert DEFAULT_SPECS[2].allow_stale_trend is False
+def test_the_daily_ticket_refuses_stale_trends():
+    """A leg whose window is missing an unfinished game may already be broken.
+    Only a ticket carried by price can take that; the daily ticket is carried
+    by form, so it must not."""
+    assert DEFAULT_SPECS[0].allow_stale_trend is False
 
 
 def test_tickets_are_no_longer_pinned_to_one_sport():

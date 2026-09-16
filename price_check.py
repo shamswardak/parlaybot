@@ -14,7 +14,7 @@ Usage
     # non-interactive: one American price per leg, in ticket order.
     # Use the --flag=value form -- negative prices look like flags otherwise.
     python price_check.py output/parlays-2026-09-12.json \\
-        --ticket="Max Trend" --prices=-600,-540,-700,...
+        --ticket="Daily Ticket" --prices=-600,-540,-700,...
 
 A leg is "value" when the posted price implies a LOWER probability than the
 model's estimate -- the book is paying you more than the trend says it should.
@@ -66,7 +66,7 @@ def main() -> int:
         epilog="Negative prices need the --prices=-600,-540 form, not a space."
     )
     ap.add_argument("ticket_file")
-    ap.add_argument("--ticket", help="ticket name, e.g. 'Max Trend'")
+    ap.add_argument("--ticket", help="ticket name, e.g. 'Daily Ticket'")
     ap.add_argument("--prices", help="comma-separated American prices, ticket order")
     ap.add_argument("--stake", type=float, default=100.0)
     args = ap.parse_args()

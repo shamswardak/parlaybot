@@ -1,6 +1,6 @@
 # parlaybot
 
-Builds 15–20 leg player-prop parlays from live success trends and posts them to
+Builds a 10-leg player-prop parlay from live success trends and posts it to
 Discord every morning. You place the bets yourself in DraftKings or FanDuel.
 
 Covers **MLB, NFL, NBA and NHL** on entirely free data — no odds subscription,
@@ -17,10 +17,10 @@ leg's probability from game logs and *estimates* what a book would charge. Those
 estimates are a shopping list, not quotes. Every price it prints must be checked
 in the app.
 
-**A 20-leg parlay at −650 a leg hits about 1 time in 30–50.** That is the
-arithmetic, not pessimism: 0.85²⁰ ≈ 3.9%. The payout is ~16x. You will have long
-losing stretches by design, so stake accordingly — this is a lottery-ticket
-structure, not an income structure.
+**Leg count is the whole game.** A 20-leg parlay at −650 a leg hits about 1
+time in 30–50: 0.85²⁰ ≈ 3.9%. Ten legs at the same per-leg accuracy hits ~20%.
+This is why the bot went from three tickets to one — see the table below. You
+will still have long losing stretches, so stake accordingly.
 
 **Vig compounds harder than anything else in the system.** If a book holds ~6%
 on each alternate prop, a 20-leg ticket returns roughly `1/1.06²⁰ ≈ 0.31` per
@@ -35,8 +35,8 @@ actually got beats the model. If it doesn't, the ticket is −EV and the bot wil
 tell you so.
 
 Fewer legs is the single biggest lever you have. A 10-leg ticket at the same
-per-leg prices carries half the vig drag of a 20-leg one. The config is set to
-your 15–20 spec, but `build.min_legs` / `build.max_legs` are one edit away.
+per-leg prices carries half the vig drag of a 20-leg one. Leg count lives in
+`tickets[].n_legs` in `config.yaml`.
 
 ---
 
@@ -50,7 +50,7 @@ streaks are the most over-bet signal in props, so four things are layered on top
    decay, so the last 8 games carry ~60% of the weight. 5-for-5 recently beats
    5-for-5 a month ago.
 2. **Beta shrinkage toward a season prior.** 8-for-8 in a small window does not
-   get scored as 100%. The posterior mixes in ~5 pseudo-games of the player's
+   get scored as 100%. The posterior mixes in 25 pseudo-games of the player's
    season-long rate, which is what stops the bot loading tickets with small-sample
    mirages.
 3. **Context adjustments**, applied in log-odds space so probabilities stay
@@ -70,29 +70,46 @@ Only legs that survive all of this make the pool:
 
 - at least 8 games of history (`trend.min_games`)
 - raw hit rate ≥ 70% in the window
-- estimated price inside `price_band` (default −1200 to −400, centred on your
-  −650 target)
+- estimated price inside `price_band` (default −1400 to −150; each ticket
+  then applies its own narrower band)
 - confidence score ≥ 0.45
 
 ### Assembling the ticket
 
 Two stages, because they pull against each other:
 
-- **Slot selection** picks which player/market ladders go on the ticket. Crucially,
-  ladders are ranked by the confidence they can deliver *at the per-leg price the
-  payout target implies* — ranking by confidence alone fills the ticket with the
-  surest, shortest-priced legs and then no amount of tuning can stretch it to
-  +1500.
-- **Rung tuning** hill-climbs which threshold each ladder sits on until the
-  product of the prices converges on the target, trading as little confidence as
-  possible to get there.
+- **Slot selection** picks which player/market ladders go on the ticket, ranked
+  by the ticket's own character: a safe ticket ranks by price and breaks ties on
+  streak, a trend ticket does the reverse.
+- **Relaxation** widens the price band a step at a time (and eases the streak
+  requirement first) only when the slate can't fill the ticket at its stated
+  criteria — and the ticket says how many steps it took. There is no payout
+  target; a ticket is correct when every leg meets its criteria.
 
 Constraints: one leg per player, and every distinct game is used before any game
 gets a second leg. Same-game legs are only added when the slate is too thin, and
 they're flagged `⚠️SGP` — the book reprices correlated legs, so the real payout
 will be shorter than the printed number on those.
 
-Three tickets a day by default (20 / 18 / 15 legs), sharing no players.
+One ticket a day: **Daily Ticket**, 10 legs at −450 to −700, current-season
+form required, at most 2 legs from any one game.
+
+It used to be three (Safe 20, Core 10, Trend 5). Four days of graded results
+retired the other two, and the reason was ticket length rather than bad
+pricing — across 93 graded legs the model predicted 80.4% and 80.6% actually
+hit, which is as calibrated as this gets:
+
+| ticket | per leg | legs | win% | payout | break-even | edge |
+|---|---|---|---|---|---|---|
+| Daily Ticket | 89.7% | 10 | 33.6% | +429 | 18.9% | **+14.6** |
+| Trend 5 | 75.0% | 5 | 23.7% | +254 | 28.2% | −4.5 |
+| Safe 20 | 78.4% | 18 | 1.2% | +653 | 13.3% | −12.0 |
+
+Safe 20 fails as arithmetic, not as a bug. Twenty legs compounds a three-point
+per-leg error into a halved ticket, and 7.5x doesn't pay for that. Trend 5 is
+priced honestly and still lands short of its break-even. Both remain defined
+under `on_demand_tickets:` in `config.yaml` and can be built by hand with
+`--ticket "Safe 20"`; neither is ever built by the schedule.
 
 ---
 
@@ -123,14 +140,21 @@ Repo → Settings → Secrets and variables → Actions → **New repository sec
 |---|---|
 | `DISCORD_WEBHOOK_URL` | webhook for the picks channel |
 | `DISCORD_RESULTS_WEBHOOK_URL` | webhook for the results channel |
+| `DISCORD_ONDEMAND_WEBHOOK_URL` | webhook for the on-demand channel |
 
 ### 4. Run it
 
-Actions tab → **Daily parlays** → *Run workflow*. It's scheduled for 14:00 UTC
-(10:00 ET) daily, which is late enough that MLB lineups and NFL inactives are
-landing and early enough to shop before lines move.
+Actions tab → **Daily parlays** → *Run workflow*. The manual run accepts a
+sport, a date, and a dry-run toggle, and always posts to the on-demand channel
+under its own history file so it can't overwrite the scheduled ticket.
 
-The manual run accepts a sports override, a date, and a dry-run toggle.
+The schedule fires five times, 13:00–17:00 UTC (9 AM – 1 PM ET). That is not a
+typo: GitHub's scheduler queue has been running 2–4 hours late (measured on this
+repo: 2h35m, 4h10m, 3h33m on three consecutive days), so the workflow takes five
+draws and the first one to actually start does the build. The rest see today's
+ticket already in `history/` and exit in seconds. A floor of 11 AM ET keeps an
+early firing from building before MLB lineups are posted, since the source falls
+back to guessing from the active roster when they aren't.
 
 > GitHub disables scheduled workflows on repos with no activity for 60 days.
 > A commit — or a manual run — resets the clock.
@@ -210,7 +234,7 @@ python price_check.py output/parlays-2026-09-12.json
 
 # or all at once (note the = signs; negative prices look like flags otherwise)
 python price_check.py output/parlays-2026-09-12.json \
-    --ticket="Max Trend" --prices=-600,-540,-700,-480,...
+    --ticket="Daily Ticket" --prices=-600,-540,-700,-480,...
 ```
 
 It prints, per leg, what the price implies vs. what the model thinks, flags the
@@ -231,18 +255,21 @@ Everything lives in `config.yaml`.
 | Setting | Effect |
 |---|---|
 | `market_hold` | Assumed book overround. Raise it → estimated prices get shorter (more conservative). 0.05–0.08 is realistic for alt props. |
-| `price_band` | Which estimated prices qualify. Widen it for more legs and a looser payout fit; narrow it to concentrate on the −650 target. |
-| `build.target_american` | Payout target. 1500 ≈ 16x. |
-| `build.min_legs` / `max_legs` | **The vig lever.** Lower these and the drag falls sharply. |
-| `build.max_legs_per_game` | Set to 1 to forbid same-game legs entirely. |
-| `build.error_weight` | How hard the tuner pushes toward the payout target vs. keeping confidence. |
+| `price_band` | Hard outer limit on any leg, whatever ticket it might land on. Each ticket's own `price_min`/`price_max` sits inside it. |
+| `tickets[].n_legs` | **The vig lever.** Lower it and the drag falls sharply. |
+| `tickets[].price_min` / `price_max` | The ticket's band, in American odds. |
+| `tickets[].max_legs_per_game` | Set to 1 to forbid same-game legs entirely. |
+| `tickets[].relax_steps` | How far the criteria may loosen when the slate is thin. Each step widens the band ~2% in implied probability. |
+| `tickets[].min_streak` | Consecutive games a player must have hit it. Eases before the band moves. |
+| `on_demand_tickets` | Defined but never built by the schedule — reachable only with `--ticket "Safe 20"`. |
 | `trend.window` / `decay` | How much history counts and how fast it decays. |
 | `trend.prior_strength` | How hard small samples get pulled toward the season rate. Raise it if the bot is finding too many hot-streak mirages. |
 | `trend.min_confidence` | Raise to 0.55+ for a much stricter pool. |
 
 Practical note on MLB: −650 alternate lines are rarer in baseball than in
-basketball. Most qualifying MLB legs will be `1+ Hits+Runs+RBI` and starting
-pitcher `3+ Strikeouts` / `12+ Outs`. NBA and NHL ladders are far richer — once
+basketball, and nothing but pitcher props genuinely reaches −900. Most
+qualifying MLB legs will be `1+ Hits+Runs+RBI` and starting pitcher
+`3+ Strikeouts` / `12+ Outs`. NBA and NHL ladders are far richer — once
 those seasons start (late Oct) the bot has much more to work with.
 
 ---
