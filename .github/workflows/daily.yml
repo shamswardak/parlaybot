@@ -2,7 +2,12 @@ name: Daily parlays
 
 on:
   schedule:
-    - cron: "0 16 * * *"
+    # 13:00 UTC = 9:00 AM ET (8:00 AM once EST starts in November).
+    # Deliberately early: GitHub's scheduler queue runs hours late, and the
+    # bot prices from its own model rather than live odds, so there is no
+    # reason to wait for the market. Nine gives ~3 hours of drift before the
+    # 1:05 first pitches, which is what a weekend slate lives or dies on.
+    - cron: "0 13 * * *"
   workflow_dispatch:
     inputs:
       sport:
@@ -23,7 +28,9 @@ on:
         default: true
 
 concurrency:
-  group: daily-parlays
+  # Separate lanes per trigger. With one shared group, a manual run left
+  # hanging blocks every scheduled run behind it, since nothing is cancelled.
+  group: daily-parlays-${{ github.event_name }}
   cancel-in-progress: false
 
 permissions:
@@ -69,7 +76,7 @@ jobs:
 
           # Every manual run is ad-hoc: its own channel, its own history file,
           # so it can never overwrite the scheduled ticket the grader is
-          # waiting to settle. Only the noon schedule writes the daily file.
+          # waiting to settle. Only the schedule writes the daily file.
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             ARGS="$ARGS --on-demand"
           fi
