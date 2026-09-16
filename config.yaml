@@ -69,9 +69,17 @@ tickets:
     min_streak: 0
     require_current_season: true
     max_legs_per_game: 2
+    # Two relaxation passes, not five. On 9/13 five passes stretched the band
+    # from -450/-700 out to -314/-1438 and STILL only found 8 legs — legs that
+    # aren't the ones the edge above was measured on. A 6-leg ticket whose legs
+    # all meet the criteria is the bet you actually tested; an 8-leg ticket
+    # with three legs outside the band is a different bet wearing its name.
+    relax_steps: 2
 
-# Never built by the scheduled run. Available by name from the on-demand
-# channel — `--ticket "Safe 20"` — so you can still pull one deliberately.
+# Not built by the scheduled run, and no longer offered by the on-demand form
+# either — that form builds the Daily Ticket for whichever sport you pick.
+# Kept here so retiring a ticket doesn't mean losing its definition: both are
+# still reachable by hand with `--ticket "Safe 20"`.
 on_demand_tickets:
   - name: "Safe 20"
     n_legs: 20            # DraftKings caps a parlay at 20 legs (FanDuel 25)
