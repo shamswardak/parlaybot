@@ -141,10 +141,13 @@ def run(settings: Settings, on: date, ticket: str | None = None,
 
     specs = settings.tickets
     if ticket:
-        specs = [s for s in specs if s.name.lower() == ticket.lower()]
+        # Named tickets can come from either list: the daily one, or a ticket
+        # retired from the schedule but kept for deliberate on-demand builds.
+        known = settings.tickets + settings.on_demand_tickets
+        specs = [s for s in known if s.name.lower() == ticket.lower()]
         if not specs:
             log.error("no ticket named %r; have: %s", ticket,
-                      ", ".join(s.name for s in settings.tickets))
+                      ", ".join(s.name for s in known))
             return 2
 
     legs, notes = collect_legs(settings, on, client)

@@ -26,9 +26,14 @@ class Settings:
     })
     # Hard outer limit on any leg, wide enough to cover every ticket's band.
     price_band: tuple[float, float] = (-1400.0, -150.0)
+    # Built by the scheduled run.
     tickets: list[TicketSpec] = field(
         default_factory=lambda: [TicketSpec(**s.__dict__) for s in DEFAULT_SPECS]
     )
+    # Defined but never built automatically -- reachable only by name, via
+    # --ticket. Retiring a ticket from the daily post shouldn't mean deleting
+    # it; Safe 20 and Trend 5 live here.
+    on_demand_tickets: list[TicketSpec] = field(default_factory=list)
     trend: TrendConfig = field(default_factory=TrendConfig)
     calibration: CalibrationConfig = field(default_factory=CalibrationConfig)
     discord_webhook: str = ""
@@ -55,12 +60,14 @@ class Settings:
             [TicketSpec(**t) for t in raw_tickets] if raw_tickets
             else [TicketSpec(**s.__dict__) for s in DEFAULT_SPECS]
         )
+        extra = [TicketSpec(**t) for t in (raw.pop("on_demand_tickets", None) or [])]
 
         band = raw.pop("price_band", None)
         settings = cls(
             trend=trend,
             calibration=calib,
             tickets=tickets,
+            on_demand_tickets=extra,
             price_band=tuple(band) if band else cls.price_band,
             **{k: v for k, v in raw.items() if k in cls.__annotations__},
         )

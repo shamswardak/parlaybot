@@ -25,10 +25,27 @@ min_minutes_to_start: 20
 # it might land on. Wide enough to cover every ticket band below.
 price_band: [-1400, -150]
 
-# The three tickets built each day. A ticket is correct when every leg meets
-# its criteria — there is no payout target. If the slate can't fill one, the
-# criteria loosen a step at a time (band widens by ~2% implied probability per
-# step, streak requirement drops by 1) and the ticket says it was loosened.
+# What the scheduled run posts each day. ONE ticket, since one is what you
+# actually place — three tickets was three ways to lose the same evening.
+#
+# The choice is from the record, not taste. Over the first four days the legs
+# themselves priced honestly (93 graded legs: 80.4% predicted, 80.6% actual),
+# but ticket length decided everything:
+#
+#   ticket     per leg  legs   win%   payout   break-even   edge
+#   Daily        89.7%    10  33.6%    +429        18.9%   +14.6
+#   Trend 5      75.0%     5  23.7%    +254        28.2%    -4.5
+#   Safe 20      78.4%    18   1.2%    +653        13.3%   -12.0
+#
+# Safe 20 fails as arithmetic, not as a bug: twenty legs compounds a 3-point
+# per-leg error into a halved ticket, and 7.5x doesn't pay for that. Trend 5
+# is priced right and still short of its break-even. Both stay defined below
+# under on_demand_tickets and can be built by hand any time.
+#
+# A ticket is correct when every leg meets its criteria — there is no payout
+# target. If the slate can't fill it, the criteria loosen a step at a time
+# (band widens by ~2% implied probability per step, streak requirement drops
+# by 1) and the ticket says it was loosened.
 #
 #   price_min / price_max   the band, in American odds
 #   sports                  omit for every enabled sport
@@ -36,6 +53,26 @@ price_band: [-1400, -150]
 #   require_current_season  false lets last season's form through, for tickets
 #                           where the price itself is the safety
 tickets:
+  - name: "Daily Ticket"
+    # Formerly "Core 10". Named without the number because the slate doesn't
+    # always have ten legs that qualify — 8 on 9/13, 10 on 9/14 and 9/15 — and
+    # a short ticket of legs that meet the criteria beats a full one padded
+    # with legs that don't.
+    n_legs: 10
+    price_min: -700
+    price_max: -450
+    preferred_sports: ["MLB"]   # a preference, not a restriction: MLB fills
+                                # first because it has months of current-season
+                                # form behind every leg. Other sports fill in
+                                # behind it, and take over entirely if you run
+                                # with one sport selected.
+    min_streak: 0
+    require_current_season: true
+    max_legs_per_game: 2
+
+# Never built by the scheduled run. Available by name from the on-demand
+# channel — `--ticket "Safe 20"` — so you can still pull one deliberately.
+on_demand_tickets:
   - name: "Safe 20"
     n_legs: 20            # DraftKings caps a parlay at 20 legs (FanDuel 25)
     price_min: -1400
@@ -50,22 +87,6 @@ tickets:
     preferred_markets: ["Strikeouts", "Outs Recorded"]
     min_streak: 0
     require_current_season: false   # near-certain lines hold up in Week 1 too
-    max_legs_per_game: 2
-    # With 15 games there are 30 starting pitchers, so a 20-leg ticket can be
-    # filled almost entirely from pitcher props at 2 per game. Hitter legs fill
-    # the remainder at -550/-700, which is where they honestly sit.
-
-  - name: "Core 10"
-    n_legs: 10
-    price_min: -700
-    price_max: -450
-    preferred_sports: ["MLB"]   # a preference, not a restriction: MLB fills
-                                # first because it has months of current-season
-                                # form behind every leg. Other sports fill in
-                                # behind it, and take over entirely if you run
-                                # with one sport selected.
-    min_streak: 0
-    require_current_season: true
     max_legs_per_game: 2
 
   - name: "Trend 5"
