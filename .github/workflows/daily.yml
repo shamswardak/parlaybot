@@ -5,11 +5,6 @@ on:
     - cron: "0 16 * * *"
   workflow_dispatch:
     inputs:
-      ticket:
-        description: "Which ticket to build"
-        type: choice
-        default: "All three"
-        options: ["All three", "Safe 20", "Core 10", "Trend 5"]
       sport:
         description: "Sport"
         type: choice
@@ -70,15 +65,12 @@ jobs:
           TZ: America/New_York
         run: |
           ARGS=""
-          TICKET="${{ github.event.inputs.ticket }}"
           SPORT="${{ github.event.inputs.sport }}"
 
-          # A manual run with a specific ticket or sport is an ad-hoc build:
-          # its own channel, its own history file, so it can't overwrite the
-          # scheduled ticket the grader is waiting on.
-          if [ -n "$TICKET" ] && [ "$TICKET" != "All three" ]; then
-            ARGS="$ARGS --ticket \"$TICKET\" --on-demand"
-          elif [ -n "$SPORT" ] && [ "$SPORT" != "All" ]; then
+          # Every manual run is ad-hoc: its own channel, its own history file,
+          # so it can never overwrite the scheduled ticket the grader is
+          # waiting to settle. Only the noon schedule writes the daily file.
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             ARGS="$ARGS --on-demand"
           fi
           if [ -n "$SPORT" ] && [ "$SPORT" != "All" ]; then
