@@ -2,10 +2,10 @@ name: Daily parlays
 
 on:
   schedule:
-    # Five firings, not one. GitHub's scheduler queue runs 2-4 hours late and
-    # sometimes drops a firing entirely (Sep 15 never ran). Whichever of these
-    # GitHub actually starts first does the build; the rest see today's ticket
-    # already in history/ and exit in seconds. 13:00-17:00 UTC = 9 AM - 1 PM ET.
+    # Five firings, not one. GitHub's scheduler queue runs 2-4 hours late.
+    # Whichever of these GitHub actually starts first does the build; the rest
+    # see today's ticket already in history/ and exit in seconds.
+    # 13:00-17:00 UTC = 9 AM - 1 PM ET.
     - cron: "0 13,14,15,16,17 * * *"
   workflow_dispatch:
     inputs:
