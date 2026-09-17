@@ -1,0 +1,28 @@
+[
+  {
+    "name": "Daily Ticket (on-demand 23:34)",
+    "date": "2026-09-16",
+    "status": "WIN",
+    "n_legs": 10,
+    "hits": 10,
+    "misses": 0,
+    "voids": 0,
+    "total_american": 392,
+    "model_probability": 0.11339,
+    "failed_legs": []
+  },
+  {
+    "name": "Daily Ticket",
+    "date": "2026-09-16",
+    "status": "LOSS",
+    "n_legs": 10,
+    "hits": 9,
+    "misses": 1,
+    "voids": 0,
+    "total_american": 382,
+    "model_probability": 0.116,
+    "failed_legs": [
+      "Mike Trout 1+ Hits+Runs+RBI \u2014 only got 0, needed 1"
+    ]
+  }
+]
