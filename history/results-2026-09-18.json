@@ -1,0 +1,19 @@
+[
+  {
+    "name": "Daily Ticket",
+    "date": "2026-09-18",
+    "status": "LOSS",
+    "n_legs": 10,
+    "hits": 6,
+    "misses": 4,
+    "voids": 0,
+    "total_american": 384,
+    "model_probability": 0.11536,
+    "failed_legs": [
+      "Bryan Woo 5+ Strikeouts \u2014 only got 4, needed 5",
+      "Chase Burns 5+ Strikeouts \u2014 only got 4, needed 5",
+      "Randy Dobnak 3+ Strikeouts \u2014 only got 1, needed 3",
+      "Gabriel Moreno 1+ Hits+Runs+RBI \u2014 only got 0, needed 1"
+    ]
+  }
+]
