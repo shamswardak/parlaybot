@@ -1,0 +1,19 @@
+[
+  {
+    "name": "Daily Ticket",
+    "date": "2026-09-19",
+    "status": "LOSS",
+    "n_legs": 10,
+    "hits": 6,
+    "misses": 4,
+    "voids": 0,
+    "total_american": 456,
+    "model_probability": 0.1005,
+    "failed_legs": [
+      "Matthew Boyd 16+ Outs Recorded \u2014 only got 15, needed 16",
+      "Michael McGreevy 3+ Strikeouts \u2014 only got 1, needed 3",
+      "Tarik Skubal 16+ Outs Recorded \u2014 only got 15, needed 16",
+      "Chase Meidroth 1+ Hits+Runs+RBI \u2014 only got 0, needed 1"
+    ]
+  }
+]
