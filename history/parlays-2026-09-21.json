@@ -1,0 +1,137 @@
+[
+  {
+    "name": "Daily Ticket",
+    "date": "2026-09-21",
+    "n_legs": 5,
+    "n_games": 3,
+    "total_american": 112,
+    "total_decimal": 2.124,
+    "model_probability": 0.35194,
+    "implied_probability": 0.47084,
+    "expected_value": 0.7475,
+    "notes": [
+      "Criteria loosened 2 step(s) to fill this: price -351 to -1076",
+      "5 legs, not 10 \u2014 the slate ran out of legs meeting this ticket's criteria even after loosening."
+    ],
+    "legs": [
+      {
+        "sport": "MLB",
+        "game": "WSH @ DET",
+        "player": "Riley Greene",
+        "player_id": "682985",
+        "stat_key": "hrr",
+        "team": "DET",
+        "market": "Hits+Runs+RBI",
+        "threshold": 1,
+        "selection": "Riley Greene 1+ Hits+Runs+RBI",
+        "est_price": -796,
+        "model_prob": 0.8381,
+        "raw_hit_rate": 0.9333,
+        "record": "8/8 L8 \u00b7 14/15 L15 \u00b7 106/135 season",
+        "streak": 11,
+        "opponent": "WSH",
+        "current_games": 135,
+        "prior_season_only": false,
+        "stale_trend": false,
+        "confidence": 0.925,
+        "notes": [
+          "11-game streak"
+        ]
+      },
+      {
+        "sport": "MLB",
+        "game": "TOR @ BAL",
+        "player": "Kazuma Okamoto",
+        "player_id": "672960",
+        "stat_key": "hrr",
+        "team": "TOR",
+        "market": "Hits+Runs+RBI",
+        "threshold": 1,
+        "selection": "Kazuma Okamoto 1+ Hits+Runs+RBI",
+        "est_price": -381,
+        "model_prob": 0.7474,
+        "raw_hit_rate": 0.8667,
+        "record": "8/8 L8 \u00b7 13/15 L15 \u00b7 103/150 season",
+        "streak": 9,
+        "opponent": "BAL",
+        "current_games": 150,
+        "prior_season_only": false,
+        "stale_trend": false,
+        "confidence": 0.911,
+        "notes": [
+          "9-game streak"
+        ]
+      },
+      {
+        "sport": "MLB",
+        "game": "MIN @ SF",
+        "player": "Zebby Matthews",
+        "player_id": "805673",
+        "stat_key": "strikeouts",
+        "team": "MIN",
+        "market": "Strikeouts",
+        "threshold": 4,
+        "selection": "Zebby Matthews 4+ Strikeouts",
+        "est_price": -570,
+        "model_prob": 0.8027,
+        "raw_hit_rate": 0.8,
+        "record": "7/8 L8 \u00b7 12/15 L15 \u00b7 18/22 season",
+        "streak": 1,
+        "opponent": "SF",
+        "current_games": 22,
+        "prior_season_only": false,
+        "stale_trend": false,
+        "confidence": 0.74,
+        "notes": [
+          "volatile role"
+        ]
+      },
+      {
+        "sport": "MLB",
+        "game": "WSH @ DET",
+        "player": "Kevin McGonigle",
+        "player_id": "805808",
+        "stat_key": "hrr",
+        "team": "DET",
+        "market": "Hits+Runs+RBI",
+        "threshold": 1,
+        "selection": "Kevin McGonigle 1+ Hits+Runs+RBI",
+        "est_price": -616,
+        "model_prob": 0.8116,
+        "raw_hit_rate": 0.8,
+        "record": "7/8 L8 \u00b7 12/15 L15 \u00b7 124/151 season",
+        "streak": 0,
+        "opponent": "WSH",
+        "current_games": 151,
+        "prior_season_only": false,
+        "stale_trend": false,
+        "confidence": 0.721,
+        "notes": []
+      },
+      {
+        "sport": "MLB",
+        "game": "TOR @ BAL",
+        "player": "Trey Yesavage",
+        "player_id": "702056",
+        "stat_key": "strikeouts",
+        "team": "TOR",
+        "market": "Strikeouts",
+        "threshold": 2,
+        "selection": "Trey Yesavage 2+ Strikeouts",
+        "est_price": -1065,
+        "model_prob": 0.8624,
+        "raw_hit_rate": 0.8667,
+        "record": "6/8 L8 \u00b7 13/15 L15 \u00b7 16/18 season",
+        "streak": 0,
+        "opponent": "BAL",
+        "current_games": 18,
+        "prior_season_only": false,
+        "stale_trend": false,
+        "confidence": 0.703,
+        "notes": [
+          "volatile role"
+        ]
+      }
+    ]
+  }
+]

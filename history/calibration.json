@@ -1,13 +1,13 @@
 {
   "counts": {
     "ALL:0": 2,
-    "ALL:1": 35,
-    "ALL:2": 85,
+    "ALL:1": 38,
+    "ALL:2": 92,
     "ALL:3": 29,
     "ALL:4": 19,
     "MLB:0": 2,
-    "MLB:1": 35,
-    "MLB:2": 75,
+    "MLB:1": 38,
+    "MLB:2": 82,
     "MLB:3": 28,
     "MLB:4": 9,
     "NFL:2": 10,
@@ -21,14 +21,14 @@
       "predicted": 0.6606
     },
     "ALL:1": {
-      "actual": 0.7429,
-      "n": 35,
-      "predicted": 0.745
+      "actual": 0.7368,
+      "n": 38,
+      "predicted": 0.7476
     },
     "ALL:2": {
-      "actual": 0.7882,
-      "n": 85,
-      "predicted": 0.8058
+      "actual": 0.7935,
+      "n": 92,
+      "predicted": 0.8049
     },
     "ALL:3": {
       "actual": 0.8966,
@@ -46,14 +46,14 @@
       "predicted": 0.6606
     },
     "MLB:1": {
-      "actual": 0.7429,
-      "n": 35,
-      "predicted": 0.745
+      "actual": 0.7368,
+      "n": 38,
+      "predicted": 0.7476
     },
     "MLB:2": {
-      "actual": 0.7867,
-      "n": 75,
-      "predicted": 0.8059
+      "actual": 0.7927,
+      "n": 82,
+      "predicted": 0.8049
     },
     "MLB:3": {
       "actual": 0.8929,
@@ -82,7 +82,7 @@
     }
   },
   "shifts": {
-    "ALL:2": -0.03236,
-    "MLB:2": -0.03232
+    "ALL:2": -0.02245,
+    "MLB:2": -0.0221
   }
 }

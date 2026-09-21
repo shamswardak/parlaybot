@@ -1,0 +1,17 @@
+[
+  {
+    "name": "Daily Ticket",
+    "date": "2026-09-20",
+    "status": "LOSS",
+    "n_legs": 10,
+    "hits": 8,
+    "misses": 2,
+    "voids": 0,
+    "total_american": 495,
+    "model_probability": 0.09384,
+    "failed_legs": [
+      "Otto Lopez 1+ Hits+Runs+RBI \u2014 only got 0, needed 1",
+      "Josh Jung 1+ Hits+Runs+RBI \u2014 only got 0, needed 1"
+    ]
+  }
+]
