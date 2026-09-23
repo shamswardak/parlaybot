@@ -1,0 +1,17 @@
+[
+  {
+    "name": "Daily Ticket",
+    "date": "2026-09-22",
+    "status": "LOSS",
+    "n_legs": 10,
+    "hits": 6,
+    "misses": 2,
+    "voids": 2,
+    "total_american": 389,
+    "model_probability": 0.11426,
+    "failed_legs": [
+      "Michael King 16+ Outs Recorded \u2014 only got 12, needed 16",
+      "Brandon Lowe 1+ Hits+Runs+RBI \u2014 only got 0, needed 1"
+    ]
+  }
+]
