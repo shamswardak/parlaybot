@@ -1,0 +1,18 @@
+[
+  {
+    "name": "Daily Ticket",
+    "date": "2026-09-24",
+    "status": "LOSS",
+    "n_legs": 10,
+    "hits": 7,
+    "misses": 3,
+    "voids": 0,
+    "total_american": 441,
+    "model_probability": 0.10331,
+    "failed_legs": [
+      "Henry Bolte 1+ Hits+Runs+RBI \u2014 only got 0, needed 1",
+      "Trea Turner 1+ Hits+Runs+RBI \u2014 only got 0, needed 1",
+      "Cam Schlittler 16+ Outs Recorded \u2014 only got 9, needed 16"
+    ]
+  }
+]
