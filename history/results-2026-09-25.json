@@ -1,0 +1,16 @@
+[
+  {
+    "name": "Daily Ticket",
+    "date": "2026-09-25",
+    "status": "LOSS",
+    "n_legs": 10,
+    "hits": 9,
+    "misses": 1,
+    "voids": 0,
+    "total_american": 501,
+    "model_probability": 0.09295,
+    "failed_legs": [
+      "Mauricio Dub\u00f3n 1+ Hits+Runs+RBI \u2014 only got 0, needed 1"
+    ]
+  }
+]
