@@ -1,0 +1,16 @@
+[
+  {
+    "name": "Daily Ticket",
+    "date": "2026-09-26",
+    "status": "LOSS",
+    "n_legs": 10,
+    "hits": 9,
+    "misses": 1,
+    "voids": 0,
+    "total_american": 511,
+    "model_probability": 0.09147,
+    "failed_legs": [
+      "Fernando Tatis Jr. 1+ Hits \u2014 only got 0, needed 1"
+    ]
+  }
+]
