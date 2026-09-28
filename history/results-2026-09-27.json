@@ -1,0 +1,18 @@
+[
+  {
+    "name": "Daily Ticket",
+    "date": "2026-09-27",
+    "status": "LOSS",
+    "n_legs": 10,
+    "hits": 7,
+    "misses": 3,
+    "voids": 0,
+    "total_american": 435,
+    "model_probability": 0.1044,
+    "failed_legs": [
+      "Nick Martinez 3+ Strikeouts \u2014 only got 1, needed 3",
+      "Bobby Witt Jr. 1+ Hits+Runs+RBI \u2014 only got 0, needed 1",
+      "Julio Rodr\u00edguez 1+ Hits+Runs+RBI \u2014 only got 0, needed 1"
+    ]
+  }
+]
