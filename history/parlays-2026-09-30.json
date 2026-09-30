@@ -1,0 +1,166 @@
+[
+  {
+    "name": "Daily Ticket",
+    "date": "2026-09-30",
+    "n_legs": 6,
+    "n_games": 3,
+    "total_american": 199,
+    "total_decimal": 2.99,
+    "model_probability": 0.23586,
+    "implied_probability": 0.33446,
+    "expected_value": 0.7052,
+    "notes": [
+      "6 legs, not 10 \u2014 the slate ran out of legs meeting this ticket's criteria even after loosening."
+    ],
+    "legs": [
+      {
+        "sport": "MLB",
+        "game": "CWS @ HOU",
+        "player": "Yordan Alvarez",
+        "player_id": "670541",
+        "stat_key": "hrr",
+        "team": "HOU",
+        "market": "Hits+Runs+RBI",
+        "threshold": 1,
+        "selection": "Yordan Alvarez 1+ Hits+Runs+RBI",
+        "est_price": -596,
+        "model_prob": 0.8079,
+        "raw_hit_rate": 0.8667,
+        "record": "8/8 L8 \u00b7 13/15 L15 \u00b7 121/158 season",
+        "streak": 12,
+        "opponent": "CWS",
+        "current_games": 158,
+        "prior_season_only": false,
+        "stale_trend": false,
+        "confidence": 0.936,
+        "notes": [
+          "12-game streak",
+          "calibrated 81%\u219281%"
+        ]
+      },
+      {
+        "sport": "MLB",
+        "game": "CHC @ SD",
+        "player": "Seiya Suzuki",
+        "player_id": "673548",
+        "stat_key": "hrr",
+        "team": "CHC",
+        "market": "Hits+Runs+RBI",
+        "threshold": 1,
+        "selection": "Seiya Suzuki 1+ Hits+Runs+RBI",
+        "est_price": -465,
+        "model_prob": 0.7765,
+        "raw_hit_rate": 0.8667,
+        "record": "8/8 L8 \u00b7 13/15 L15 \u00b7 105/143 season",
+        "streak": 11,
+        "opponent": "SD",
+        "current_games": 143,
+        "prior_season_only": false,
+        "stale_trend": false,
+        "confidence": 0.906,
+        "notes": [
+          "11-game streak",
+          "calibrated 78%\u219278%"
+        ]
+      },
+      {
+        "sport": "MLB",
+        "game": "BOS @ NYY",
+        "player": "Sonny Gray",
+        "player_id": "543243",
+        "stat_key": "outs",
+        "team": "BOS",
+        "market": "Outs Recorded",
+        "threshold": 16,
+        "selection": "Sonny Gray 16+ Outs Recorded",
+        "est_price": -491,
+        "model_prob": 0.7838,
+        "raw_hit_rate": 0.8667,
+        "record": "7/8 L8 \u00b7 13/15 L15 \u00b7 22/29 season",
+        "streak": 4,
+        "opponent": "NYY",
+        "current_games": 29,
+        "prior_season_only": false,
+        "stale_trend": false,
+        "confidence": 0.807,
+        "notes": [
+          "4-game streak",
+          "calibrated 79%\u219278%"
+        ]
+      },
+      {
+        "sport": "MLB",
+        "game": "CWS @ HOU",
+        "player": "Miguel Vargas",
+        "player_id": "678246",
+        "stat_key": "hrr",
+        "team": "CWS",
+        "market": "Hits+Runs+RBI",
+        "threshold": 1,
+        "selection": "Miguel Vargas 1+ Hits+Runs+RBI",
+        "est_price": -541,
+        "model_prob": 0.7961,
+        "raw_hit_rate": 0.9333,
+        "record": "8/8 L8 \u00b7 14/15 L15 \u00b7 119/159 season",
+        "streak": 8,
+        "opponent": "HOU",
+        "current_games": 159,
+        "prior_season_only": false,
+        "stale_trend": false,
+        "confidence": 0.895,
+        "notes": [
+          "8-game streak",
+          "calibrated 80%\u219280%"
+        ]
+      },
+      {
+        "sport": "MLB",
+        "game": "CHC @ SD",
+        "player": "Kevin Gausman",
+        "player_id": "592332",
+        "stat_key": "outs",
+        "team": "CHC",
+        "market": "Outs Recorded",
+        "threshold": 15,
+        "selection": "Kevin Gausman 15+ Outs Recorded",
+        "est_price": -462,
+        "model_prob": 0.7757,
+        "raw_hit_rate": 0.7333,
+        "record": "5/8 L8 \u00b7 11/15 L15 \u00b7 26/32 season",
+        "streak": 2,
+        "opponent": "SD",
+        "current_games": 32,
+        "prior_season_only": false,
+        "stale_trend": false,
+        "confidence": 0.757,
+        "notes": [
+          "calibrated 78%\u219278%"
+        ]
+      },
+      {
+        "sport": "MLB",
+        "game": "BOS @ NYY",
+        "player": "Max Fried",
+        "player_id": "608331",
+        "stat_key": "outs",
+        "team": "NYY",
+        "market": "Outs Recorded",
+        "threshold": 12,
+        "selection": "Max Fried 12+ Outs Recorded",
+        "est_price": -466,
+        "model_prob": 0.7767,
+        "raw_hit_rate": 0.7333,
+        "record": "6/8 L8 \u00b7 11/15 L15 \u00b7 16/20 season",
+        "streak": 2,
+        "opponent": "BOS",
+        "current_games": 20,
+        "prior_season_only": false,
+        "stale_trend": false,
+        "confidence": 0.744,
+        "notes": [
+          "volatile role"
+        ]
+      }
+    ]
+  }
+]

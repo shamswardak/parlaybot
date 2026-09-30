@@ -1,0 +1,14 @@
+[
+  {
+    "name": "Daily Ticket",
+    "date": "2026-09-29",
+    "status": "PENDING",
+    "n_legs": 6,
+    "hits": 0,
+    "misses": 0,
+    "voids": 6,
+    "total_american": 196,
+    "model_probability": 0.23837,
+    "failed_legs": []
+  }
+]
