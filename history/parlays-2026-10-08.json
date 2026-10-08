@@ -1,0 +1,119 @@
+[
+  {
+    "name": "Daily Ticket",
+    "date": "2026-10-08",
+    "n_legs": 4,
+    "n_games": 2,
+    "total_american": -108,
+    "total_decimal": 1.923,
+    "model_probability": 0.4119,
+    "implied_probability": 0.51999,
+    "expected_value": 0.7921,
+    "notes": [
+      "4 legs, not 10 \u2014 the slate ran out of legs meeting this ticket's criteria even after loosening."
+    ],
+    "legs": [
+      {
+        "sport": "MLB",
+        "game": "CLE @ CWS",
+        "player": "Miguel Vargas",
+        "player_id": "678246",
+        "stat_key": "hrr",
+        "team": "CWS",
+        "market": "Hits+Runs+RBI",
+        "threshold": 1,
+        "selection": "Miguel Vargas 1+ Hits+Runs+RBI",
+        "est_price": -570,
+        "model_prob": 0.8026,
+        "raw_hit_rate": 0.9333,
+        "record": "8/8 L8 \u00b7 14/15 L15 \u00b7 119/159 season",
+        "streak": 8,
+        "opponent": "CLE",
+        "current_games": 159,
+        "prior_season_only": false,
+        "stale_trend": false,
+        "confidence": 0.899,
+        "notes": [
+          "8-game streak",
+          "calibrated 81%\u219280%"
+        ]
+      },
+      {
+        "sport": "NFL",
+        "game": "TB @ DAL",
+        "player": "Dak Prescott",
+        "player_id": "00-0033077",
+        "stat_key": "completions",
+        "team": "DAL",
+        "market": "Completions",
+        "threshold": 20,
+        "selection": "Dak Prescott 20+ Completions",
+        "est_price": -671,
+        "model_prob": 0.8211,
+        "raw_hit_rate": 0.8,
+        "record": "6/8 L8 \u00b7 12/15 L15 \u00b7 17/21 season",
+        "streak": 4,
+        "opponent": "TB",
+        "current_games": 4,
+        "prior_season_only": false,
+        "stale_trend": false,
+        "confidence": 0.83,
+        "notes": [
+          "4-game streak",
+          "calibrated 83%\u219282%"
+        ]
+      },
+      {
+        "sport": "MLB",
+        "game": "CLE @ CWS",
+        "player": "Chase Meidroth",
+        "player_id": "805367",
+        "stat_key": "hrr",
+        "team": "CWS",
+        "market": "Hits+Runs+RBI",
+        "threshold": 1,
+        "selection": "Chase Meidroth 1+ Hits+Runs+RBI",
+        "est_price": -511,
+        "model_prob": 0.7889,
+        "raw_hit_rate": 0.8,
+        "record": "7/8 L8 \u00b7 12/15 L15 \u00b7 118/154 season",
+        "streak": 5,
+        "opponent": "CLE",
+        "current_games": 154,
+        "prior_season_only": false,
+        "stale_trend": false,
+        "confidence": 0.866,
+        "notes": [
+          "5-game streak",
+          "calibrated 80%\u219279%"
+        ]
+      },
+      {
+        "sport": "NFL",
+        "game": "TB @ DAL",
+        "player": "Cade Otton",
+        "player_id": "00-0038129",
+        "stat_key": "receptions",
+        "team": "TB",
+        "market": "Receptions",
+        "threshold": 3,
+        "selection": "Cade Otton 3+ Receptions",
+        "est_price": -524,
+        "model_prob": 0.7923,
+        "raw_hit_rate": 0.8,
+        "record": "7/8 L8 \u00b7 12/15 L15 \u00b7 15/19 season",
+        "streak": 4,
+        "opponent": "DAL",
+        "current_games": 4,
+        "prior_season_only": false,
+        "stale_trend": false,
+        "confidence": 0.805,
+        "notes": [
+          "4-game streak",
+          "volatile role",
+          "calibrated 80%\u219279%"
+        ]
+      }
+    ]
+  }
+]
