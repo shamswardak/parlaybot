@@ -1,0 +1,17 @@
+[
+  {
+    "name": "Daily Ticket",
+    "date": "2026-10-11",
+    "status": "LOSS",
+    "n_legs": 10,
+    "hits": 5,
+    "misses": 2,
+    "voids": 3,
+    "total_american": 450,
+    "model_probability": 0.10151,
+    "failed_legs": [
+      "Justin Herbert 175+ Passing Yards \u2014 only got 121, needed 175",
+      "Deebo Samuel Sr. 25+ Receiving Yards \u2014 only got 21, needed 25"
+    ]
+  }
+]

@@ -1,0 +1,113 @@
+[
+  {
+    "name": "Daily Ticket",
+    "date": "2026-10-12",
+    "n_legs": 4,
+    "n_games": 2,
+    "total_american": 101,
+    "total_decimal": 2.013,
+    "model_probability": 0.39345,
+    "implied_probability": 0.49671,
+    "expected_value": 0.7921,
+    "notes": [
+      "Criteria loosened 1 step(s) to fill this: price -395 to -852",
+      "4 legs, not 10 \u2014 the slate ran out of legs meeting this ticket's criteria even after loosening."
+    ],
+    "legs": [
+      {
+        "sport": "MLB",
+        "game": "CLE @ TB",
+        "player": "Steven Kwan",
+        "player_id": "680757",
+        "stat_key": "hrr",
+        "team": "CLE",
+        "market": "Hits+Runs+RBI",
+        "threshold": 1,
+        "selection": "Steven Kwan 1+ Hits+Runs+RBI",
+        "est_price": -396,
+        "model_prob": 0.7532,
+        "raw_hit_rate": 0.8667,
+        "record": "6/8 L8 \u00b7 13/15 L15 \u00b7 110/151 season",
+        "streak": 2,
+        "opponent": "TB",
+        "current_games": 151,
+        "prior_season_only": false,
+        "stale_trend": false,
+        "confidence": 0.722,
+        "notes": []
+      },
+      {
+        "sport": "NFL",
+        "game": "BUF @ LA",
+        "player": "Josh Allen",
+        "player_id": "00-0034857",
+        "stat_key": "passing_yards",
+        "team": "BUF",
+        "market": "Passing Yards",
+        "threshold": 175,
+        "selection": "Josh Allen 175+ Passing Yards",
+        "est_price": -812,
+        "model_prob": 0.84,
+        "raw_hit_rate": 0.8667,
+        "record": "7/8 L8 \u00b7 13/15 L15 \u00b7 18/22 season",
+        "streak": 4,
+        "opponent": "LA",
+        "current_games": 4,
+        "prior_season_only": false,
+        "stale_trend": false,
+        "confidence": 0.834,
+        "notes": [
+          "4-game streak"
+        ]
+      },
+      {
+        "sport": "MLB",
+        "game": "CLE @ TB",
+        "player": "Drew Rasmussen",
+        "player_id": "656876",
+        "stat_key": "strikeouts",
+        "team": "TB",
+        "market": "Strikeouts",
+        "threshold": 4,
+        "selection": "Drew Rasmussen 4+ Strikeouts",
+        "est_price": -423,
+        "model_prob": 0.7629,
+        "raw_hit_rate": 0.7333,
+        "record": "6/8 L8 \u00b7 11/15 L15 \u00b7 23/30 season",
+        "streak": 1,
+        "opponent": "CLE",
+        "current_games": 30,
+        "prior_season_only": false,
+        "stale_trend": false,
+        "confidence": 0.731,
+        "notes": []
+      },
+      {
+        "sport": "NFL",
+        "game": "BUF @ LA",
+        "player": "Kyren Williams",
+        "player_id": "00-0037840",
+        "stat_key": "receiving_yards",
+        "team": "LA",
+        "market": "Receiving Yards",
+        "threshold": 10,
+        "selection": "Kyren Williams 10+ Receiving Yards",
+        "est_price": -635,
+        "model_prob": 0.8151,
+        "raw_hit_rate": 0.8,
+        "record": "8/8 L8 \u00b7 12/15 L15 \u00b7 19/24 season",
+        "streak": 4,
+        "opponent": "BUF",
+        "current_games": 4,
+        "prior_season_only": false,
+        "stale_trend": false,
+        "confidence": 0.818,
+        "notes": [
+          "4-game streak",
+          "volatile role",
+          "calibrated 82%\u219282%"
+        ]
+      }
+    ]
+  }
+]
