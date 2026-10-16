@@ -1,0 +1,17 @@
+[
+  {
+    "name": "Daily Ticket",
+    "date": "2026-10-15",
+    "status": "LOSS",
+    "n_legs": 9,
+    "hits": 5,
+    "misses": 2,
+    "voids": 2,
+    "total_american": 438,
+    "model_probability": 0.11011,
+    "failed_legs": [
+      "Mika Zibanejad 2+ Shots on Goal \u2014 only got 0, needed 2",
+      "Elias Pettersson 1+ Points \u2014 only got 0, needed 1"
+    ]
+  }
+]
