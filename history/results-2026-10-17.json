@@ -1,0 +1,20 @@
+[
+  {
+    "name": "Daily Ticket",
+    "date": "2026-10-17",
+    "status": "LOSS",
+    "n_legs": 10,
+    "hits": 3,
+    "misses": 5,
+    "voids": 2,
+    "total_american": 612,
+    "model_probability": 0.07843,
+    "failed_legs": [
+      "Auston Matthews 1+ Points \u2014 only got 0, needed 1",
+      "Nate Schmidt 1+ Shots on Goal \u2014 only got 0, needed 1",
+      "Matty Beniers 1+ Shots on Goal \u2014 only got 0, needed 1",
+      "Adam Fox 1+ Points \u2014 only got 0, needed 1",
+      "William Nylander 2+ Shots on Goal \u2014 only got 1, needed 2"
+    ]
+  }
+]
