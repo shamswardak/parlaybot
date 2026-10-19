@@ -1,0 +1,17 @@
+[
+  {
+    "name": "Daily Ticket",
+    "date": "2026-10-18",
+    "status": "LOSS",
+    "n_legs": 10,
+    "hits": 7,
+    "misses": 2,
+    "voids": 1,
+    "total_american": 407,
+    "model_probability": 0.11021,
+    "failed_legs": [
+      "Brian Robinson 10+ Rushing Yards \u2014 only got 1, needed 10",
+      "Omarion Hampton 30+ Rushing Yards \u2014 only got 18, needed 30"
+    ]
+  }
+]
