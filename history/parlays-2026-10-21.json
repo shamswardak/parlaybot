@@ -1,0 +1,115 @@
+[
+  {
+    "name": "Daily Ticket",
+    "date": "2026-10-21",
+    "n_legs": 4,
+    "n_games": 2,
+    "total_american": 134,
+    "total_decimal": 2.335,
+    "model_probability": 0.33918,
+    "implied_probability": 0.42824,
+    "expected_value": 0.792,
+    "notes": [
+      "Criteria loosened 1 step(s) to fill this: price -395 to -852",
+      "4 legs, not 10 \u2014 the slate ran out of legs meeting this ticket's criteria even after loosening."
+    ],
+    "legs": [
+      {
+        "sport": "NHL",
+        "game": "PHI @ BUF",
+        "player": "Jack Quinn",
+        "player_id": "8482097",
+        "stat_key": "shots",
+        "team": "BUF",
+        "market": "Shots on Goal",
+        "threshold": 2,
+        "selection": "Jack Quinn 2+ Shots on Goal",
+        "est_price": -432,
+        "model_prob": 0.766,
+        "raw_hit_rate": 0.7778,
+        "record": "6/8 L8 \u00b7 7/9 L9 \u00b7 7/9 season",
+        "streak": 3,
+        "opponent": "PHI",
+        "current_games": 9,
+        "prior_season_only": false,
+        "stale_trend": false,
+        "confidence": 0.685,
+        "notes": [
+          "calibrated 78%\u219277%"
+        ]
+      },
+      {
+        "sport": "NHL",
+        "game": "FLA @ OTT",
+        "player": "Tyler Kleven",
+        "player_id": "8482095",
+        "stat_key": "shots",
+        "team": "OTT",
+        "market": "Shots on Goal",
+        "threshold": 1,
+        "selection": "Tyler Kleven 1+ Shots on Goal",
+        "est_price": -426,
+        "model_prob": 0.7641,
+        "raw_hit_rate": 0.7778,
+        "record": "6/8 L8 \u00b7 7/9 L9 \u00b7 7/9 season",
+        "streak": 2,
+        "opponent": "FLA",
+        "current_games": 9,
+        "prior_season_only": false,
+        "stale_trend": false,
+        "confidence": 0.652,
+        "notes": [
+          "calibrated 78%\u219276%"
+        ]
+      },
+      {
+        "sport": "NHL",
+        "game": "PHI @ BUF",
+        "player": "Tage Thompson",
+        "player_id": "8479420",
+        "stat_key": "shots",
+        "team": "BUF",
+        "market": "Shots on Goal",
+        "threshold": 2,
+        "selection": "Tage Thompson 2+ Shots on Goal",
+        "est_price": -416,
+        "model_prob": 0.7605,
+        "raw_hit_rate": 0.7778,
+        "record": "6/8 L8 \u00b7 7/9 L9 \u00b7 7/9 season",
+        "streak": 2,
+        "opponent": "PHI",
+        "current_games": 9,
+        "prior_season_only": false,
+        "stale_trend": false,
+        "confidence": 0.653,
+        "notes": [
+          "calibrated 77%\u219276%"
+        ]
+      },
+      {
+        "sport": "NHL",
+        "game": "FLA @ OTT",
+        "player": "Tim St\u00fctzle",
+        "player_id": "8482116",
+        "stat_key": "points",
+        "team": "OTT",
+        "market": "Points",
+        "threshold": 1,
+        "selection": "Tim St\u00fctzle 1+ Points",
+        "est_price": -420,
+        "model_prob": 0.7619,
+        "raw_hit_rate": 0.7778,
+        "record": "6/8 L8 \u00b7 7/9 L9 \u00b7 7/9 season",
+        "streak": 1,
+        "opponent": "FLA",
+        "current_games": 9,
+        "prior_season_only": false,
+        "stale_trend": false,
+        "confidence": 0.618,
+        "notes": [
+          "calibrated 77%\u219276%"
+        ]
+      }
+    ]
+  }
+]
