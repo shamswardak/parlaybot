@@ -1,0 +1,167 @@
+[
+  {
+    "name": "Daily Ticket",
+    "date": "2026-10-23",
+    "n_legs": 6,
+    "n_games": 3,
+    "total_american": 190,
+    "total_decimal": 2.898,
+    "model_probability": 0.24328,
+    "implied_probability": 0.34506,
+    "expected_value": 0.705,
+    "notes": [
+      "6 legs, not 10 \u2014 the slate ran out of legs meeting this ticket's criteria even after loosening."
+    ],
+    "legs": [
+      {
+        "sport": "MLB",
+        "game": "TB @ MIL",
+        "player": "Jackson Chourio",
+        "player_id": "694192",
+        "stat_key": "hrr",
+        "team": "MIL",
+        "market": "Hits+Runs+RBI",
+        "threshold": 1,
+        "selection": "Jackson Chourio 1+ Hits+Runs+RBI",
+        "est_price": -533,
+        "model_prob": 0.7944,
+        "raw_hit_rate": 0.7333,
+        "record": "7/8 L8 \u00b7 11/15 L15 \u00b7 101/127 season",
+        "streak": 7,
+        "opponent": "TB",
+        "current_games": 127,
+        "prior_season_only": false,
+        "stale_trend": false,
+        "confidence": 0.891,
+        "notes": [
+          "7-game streak",
+          "volatile role",
+          "calibrated 80%\u219279%"
+        ]
+      },
+      {
+        "sport": "NHL",
+        "game": "MTL @ CHI",
+        "player": "Alex Newhook",
+        "player_id": "8481618",
+        "stat_key": "shots",
+        "team": "MTL",
+        "market": "Shots on Goal",
+        "threshold": 1,
+        "selection": "Alex Newhook 1+ Shots on Goal",
+        "est_price": -470,
+        "model_prob": 0.7779,
+        "raw_hit_rate": 0.7778,
+        "record": "6/8 L8 \u00b7 7/9 L9 \u00b7 7/9 season",
+        "streak": 4,
+        "opponent": "CHI",
+        "current_games": 9,
+        "prior_season_only": false,
+        "stale_trend": false,
+        "confidence": 0.73,
+        "notes": [
+          "4-game streak",
+          "calibrated 78%\u219278%"
+        ]
+      },
+      {
+        "sport": "NHL",
+        "game": "TBL @ COL",
+        "player": "Martin Necas",
+        "player_id": "8480039",
+        "stat_key": "shots",
+        "team": "COL",
+        "market": "Shots on Goal",
+        "threshold": 2,
+        "selection": "Martin Necas 2+ Shots on Goal",
+        "est_price": -509,
+        "model_prob": 0.7886,
+        "raw_hit_rate": 0.8,
+        "record": "6/8 L8 \u00b7 8/10 L10 \u00b7 8/10 season",
+        "streak": 2,
+        "opponent": "TBL",
+        "current_games": 10,
+        "prior_season_only": false,
+        "stale_trend": false,
+        "confidence": 0.672,
+        "notes": [
+          "calibrated 79%\u219279%"
+        ]
+      },
+      {
+        "sport": "MLB",
+        "game": "TB @ MIL",
+        "player": "Brice Turang",
+        "player_id": "668930",
+        "stat_key": "hrr",
+        "team": "MIL",
+        "market": "Hits+Runs+RBI",
+        "threshold": 1,
+        "selection": "Brice Turang 1+ Hits+Runs+RBI",
+        "est_price": -589,
+        "model_prob": 0.8065,
+        "raw_hit_rate": 0.8667,
+        "record": "6/8 L8 \u00b7 13/15 L15 \u00b7 118/151 season",
+        "streak": 6,
+        "opponent": "TB",
+        "current_games": 151,
+        "prior_season_only": false,
+        "stale_trend": false,
+        "confidence": 0.883,
+        "notes": [
+          "6-game streak",
+          "calibrated 81%\u219281%"
+        ]
+      },
+      {
+        "sport": "NHL",
+        "game": "MTL @ CHI",
+        "player": "Nick Suzuki",
+        "player_id": "8480018",
+        "stat_key": "points",
+        "team": "MTL",
+        "market": "Points",
+        "threshold": 1,
+        "selection": "Nick Suzuki 1+ Points",
+        "est_price": -480,
+        "model_prob": 0.7807,
+        "raw_hit_rate": 0.7778,
+        "record": "7/8 L8 \u00b7 7/9 L9 \u00b7 7/9 season",
+        "streak": 4,
+        "opponent": "CHI",
+        "current_games": 9,
+        "prior_season_only": false,
+        "stale_trend": false,
+        "confidence": 0.719,
+        "notes": [
+          "4-game streak",
+          "calibrated 79%\u219278%"
+        ]
+      },
+      {
+        "sport": "NHL",
+        "game": "TBL @ COL",
+        "player": "Nathan MacKinnon",
+        "player_id": "8477492",
+        "stat_key": "shots",
+        "team": "COL",
+        "market": "Shots on Goal",
+        "threshold": 2,
+        "selection": "Nathan MacKinnon 2+ Shots on Goal",
+        "est_price": -527,
+        "model_prob": 0.7929,
+        "raw_hit_rate": 0.8,
+        "record": "6/8 L8 \u00b7 8/10 L10 \u00b7 8/10 season",
+        "streak": 1,
+        "opponent": "TBL",
+        "current_games": 10,
+        "prior_season_only": false,
+        "stale_trend": false,
+        "confidence": 0.642,
+        "notes": [
+          "calibrated 80%\u219279%"
+        ]
+      }
+    ]
+  }
+]
