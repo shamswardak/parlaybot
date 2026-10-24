@@ -1,0 +1,17 @@
+[
+  {
+    "name": "Daily Ticket",
+    "date": "2026-10-23",
+    "status": "LOSS",
+    "n_legs": 6,
+    "hits": 1,
+    "misses": 2,
+    "voids": 3,
+    "total_american": 190,
+    "model_probability": 0.24328,
+    "failed_legs": [
+      "Alex Newhook 1+ Shots on Goal \u2014 only got 0, needed 1",
+      "Martin Necas 2+ Shots on Goal \u2014 only got 1, needed 2"
+    ]
+  }
+]
