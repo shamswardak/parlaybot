@@ -1,0 +1,17 @@
+[
+  {
+    "name": "Daily Ticket",
+    "date": "2026-10-24",
+    "status": "LOSS",
+    "n_legs": 10,
+    "hits": 7,
+    "misses": 2,
+    "voids": 1,
+    "total_american": 364,
+    "model_probability": 0.12047,
+    "failed_legs": [
+      "Quinn Hughes 2+ Shots on Goal \u2014 only got 1, needed 2",
+      "Viktor Arvidsson 2+ Shots on Goal \u2014 only got 1, needed 2"
+    ]
+  }
+]
