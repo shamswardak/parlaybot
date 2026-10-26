@@ -1,0 +1,17 @@
+[
+  {
+    "name": "Daily Ticket",
+    "date": "2026-10-25",
+    "status": "LOSS",
+    "n_legs": 10,
+    "hits": 8,
+    "misses": 2,
+    "voids": 0,
+    "total_american": 399,
+    "model_probability": 0.11183,
+    "failed_legs": [
+      "Kenneth Walker III 40+ Rushing Yards \u2014 only got 36, needed 40",
+      "Bo Horvat 3+ Shots on Goal \u2014 only got 2, needed 3"
+    ]
+  }
+]
