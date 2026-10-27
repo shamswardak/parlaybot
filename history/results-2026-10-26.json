@@ -1,0 +1,18 @@
+[
+  {
+    "name": "Daily Ticket",
+    "date": "2026-10-26",
+    "status": "LOSS",
+    "n_legs": 10,
+    "hits": 4,
+    "misses": 3,
+    "voids": 3,
+    "total_american": 437,
+    "model_probability": 0.10399,
+    "failed_legs": [
+      "Braden Schneider 1+ Shots on Goal \u2014 only got 0, needed 1",
+      "Auston Matthews 2+ Shots on Goal \u2014 only got 1, needed 2",
+      "Kirill Marchenko 2+ Shots on Goal \u2014 only got 1, needed 2"
+    ]
+  }
+]
