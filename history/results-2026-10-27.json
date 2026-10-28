@@ -1,0 +1,17 @@
+[
+  {
+    "name": "Daily Ticket",
+    "date": "2026-10-27",
+    "status": "LOSS",
+    "n_legs": 10,
+    "hits": 6,
+    "misses": 2,
+    "voids": 2,
+    "total_american": 455,
+    "model_probability": 0.10065,
+    "failed_legs": [
+      "Logan Stankoven 2+ Shots on Goal \u2014 only got 1, needed 2",
+      "Artemi Panarin 3+ Shots on Goal \u2014 only got 0, needed 3"
+    ]
+  }
+]
