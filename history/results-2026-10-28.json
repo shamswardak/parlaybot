@@ -1,0 +1,19 @@
+[
+  {
+    "name": "Daily Ticket",
+    "date": "2026-10-28",
+    "status": "LOSS",
+    "n_legs": 10,
+    "hits": 4,
+    "misses": 4,
+    "voids": 2,
+    "total_american": 451,
+    "model_probability": 0.1014,
+    "failed_legs": [
+      "Tyson Foerster 2+ Shots on Goal \u2014 only got 1, needed 2",
+      "Luke Hughes 2+ Shots on Goal \u2014 only got 0, needed 2",
+      "Leon Draisaitl 3+ Shots on Goal \u2014 only got 2, needed 3",
+      "Morgan Rielly 1+ Shots on Goal \u2014 only got 0, needed 1"
+    ]
+  }
+]
