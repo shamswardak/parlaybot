@@ -1,0 +1,16 @@
+[
+  {
+    "name": "Daily Ticket",
+    "date": "2026-10-29",
+    "status": "LOSS",
+    "n_legs": 10,
+    "hits": 7,
+    "misses": 1,
+    "voids": 2,
+    "total_american": 443,
+    "model_probability": 0.10279,
+    "failed_legs": [
+      "Sebastian Aho 1+ Points \u2014 only got 0, needed 1"
+    ]
+  }
+]

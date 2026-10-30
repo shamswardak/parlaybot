@@ -1,0 +1,168 @@
+[
+  {
+    "name": "Daily Ticket",
+    "date": "2026-10-30",
+    "n_legs": 6,
+    "n_games": 3,
+    "total_american": 191,
+    "total_decimal": 2.909,
+    "model_probability": 0.24226,
+    "implied_probability": 0.34372,
+    "expected_value": 0.7048,
+    "notes": [
+      "Criteria loosened 1 step(s) to fill this: price -395 to -852",
+      "6 legs, not 10 \u2014 the slate ran out of legs meeting this ticket's criteria even after loosening."
+    ],
+    "legs": [
+      {
+        "sport": "NHL",
+        "game": "WPG @ FLA",
+        "player": "Carter Verhaeghe",
+        "player_id": "8477409",
+        "stat_key": "shots",
+        "team": "FLA",
+        "market": "Shots on Goal",
+        "threshold": 1,
+        "selection": "Carter Verhaeghe 1+ Shots on Goal",
+        "est_price": -483,
+        "model_prob": 0.7815,
+        "raw_hit_rate": 0.7692,
+        "record": "7/8 L8 \u00b7 10/13 L13 \u00b7 10/13 season",
+        "streak": 7,
+        "opponent": "WPG",
+        "current_games": 13,
+        "prior_season_only": false,
+        "stale_trend": false,
+        "confidence": 0.906,
+        "notes": [
+          "7-game streak",
+          "calibrated 79%\u219278%"
+        ]
+      },
+      {
+        "sport": "NHL",
+        "game": "SEA @ CGY",
+        "player": "Zach Whitecloud",
+        "player_id": "8480727",
+        "stat_key": "shots",
+        "team": "CGY",
+        "market": "Shots on Goal",
+        "threshold": 1,
+        "selection": "Zach Whitecloud 1+ Shots on Goal",
+        "est_price": -397,
+        "model_prob": 0.7535,
+        "raw_hit_rate": 0.75,
+        "record": "7/8 L8 \u00b7 9/12 L12 \u00b7 9/12 season",
+        "streak": 7,
+        "opponent": "SEA",
+        "current_games": 12,
+        "prior_season_only": false,
+        "stale_trend": false,
+        "confidence": 0.88,
+        "notes": [
+          "7-game streak",
+          "calibrated 77%\u219275%"
+        ]
+      },
+      {
+        "sport": "NHL",
+        "game": "NJD @ VGK",
+        "player": "Brayden McNabb",
+        "player_id": "8475188",
+        "stat_key": "shots",
+        "team": "VGK",
+        "market": "Shots on Goal",
+        "threshold": 1,
+        "selection": "Brayden McNabb 1+ Shots on Goal",
+        "est_price": -539,
+        "model_prob": 0.7957,
+        "raw_hit_rate": 0.7857,
+        "record": "7/8 L8 \u00b7 11/14 L14 \u00b7 11/14 season",
+        "streak": 6,
+        "opponent": "NJD",
+        "current_games": 14,
+        "prior_season_only": false,
+        "stale_trend": false,
+        "confidence": 0.893,
+        "notes": [
+          "6-game streak",
+          "calibrated 80%\u219280%"
+        ]
+      },
+      {
+        "sport": "NHL",
+        "game": "NJD @ VGK",
+        "player": "Nico Hischier",
+        "player_id": "8480002",
+        "stat_key": "shots",
+        "team": "NJD",
+        "market": "Shots on Goal",
+        "threshold": 2,
+        "selection": "Nico Hischier 2+ Shots on Goal",
+        "est_price": -451,
+        "model_prob": 0.7722,
+        "raw_hit_rate": 0.7692,
+        "record": "7/8 L8 \u00b7 10/13 L13 \u00b7 10/13 season",
+        "streak": 6,
+        "opponent": "VGK",
+        "current_games": 13,
+        "prior_season_only": false,
+        "stale_trend": false,
+        "confidence": 0.872,
+        "notes": [
+          "6-game streak",
+          "calibrated 78%\u219277%"
+        ]
+      },
+      {
+        "sport": "NHL",
+        "game": "SEA @ CGY",
+        "player": "Jake Middleton",
+        "player_id": "8478136",
+        "stat_key": "shots",
+        "team": "CGY",
+        "market": "Shots on Goal",
+        "threshold": 1,
+        "selection": "Jake Middleton 1+ Shots on Goal",
+        "est_price": -677,
+        "model_prob": 0.822,
+        "raw_hit_rate": 0.8333,
+        "record": "6/8 L8 \u00b7 10/12 L12 \u00b7 10/12 season",
+        "streak": 1,
+        "opponent": "SEA",
+        "current_games": 12,
+        "prior_season_only": false,
+        "stale_trend": false,
+        "confidence": 0.688,
+        "notes": [
+          "calibrated 83%\u219282%"
+        ]
+      },
+      {
+        "sport": "NHL",
+        "game": "WPG @ FLA",
+        "player": "Mark Scheifele",
+        "player_id": "8476460",
+        "stat_key": "shots",
+        "team": "WPG",
+        "market": "Shots on Goal",
+        "threshold": 1,
+        "selection": "Mark Scheifele 1+ Shots on Goal",
+        "est_price": -632,
+        "model_prob": 0.8145,
+        "raw_hit_rate": 0.8462,
+        "record": "7/8 L8 \u00b7 11/13 L13 \u00b7 11/13 season",
+        "streak": 0,
+        "opponent": "FLA",
+        "current_games": 13,
+        "prior_season_only": false,
+        "stale_trend": false,
+        "confidence": 0.668,
+        "notes": [
+          "short rest",
+          "calibrated 82%\u219281%"
+        ]
+      }
+    ]
+  }
+]

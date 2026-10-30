@@ -1,8 +1,8 @@
 {
   "counts": {
     "ALL:0": 2,
-    "ALL:1": 90,
-    "ALL:2": 202,
+    "ALL:1": 93,
+    "ALL:2": 207,
     "ALL:3": 40,
     "ALL:4": 19,
     "MLB:0": 2,
@@ -11,11 +11,11 @@
     "MLB:3": 30,
     "MLB:4": 9,
     "NFL:1": 6,
-    "NFL:2": 31,
+    "NFL:2": 32,
     "NFL:3": 5,
     "NFL:4": 10,
-    "NHL:1": 35,
-    "NHL:2": 41,
+    "NHL:1": 38,
+    "NHL:2": 45,
     "NHL:3": 5
   },
   "observed": {
@@ -25,14 +25,14 @@
       "predicted": 0.6606
     },
     "ALL:1": {
-      "actual": 0.6889,
-      "n": 90,
-      "predicted": 0.7588
+      "actual": 0.6882,
+      "n": 93,
+      "predicted": 0.7594
     },
     "ALL:2": {
-      "actual": 0.7822,
-      "n": 202,
-      "predicted": 0.8026
+      "actual": 0.7874,
+      "n": 207,
+      "predicted": 0.8028
     },
     "ALL:3": {
       "actual": 0.875,
@@ -75,9 +75,9 @@
       "predicted": 0.776
     },
     "NFL:2": {
-      "actual": 0.8065,
-      "n": 31,
-      "predicted": 0.8062
+      "actual": 0.8125,
+      "n": 32,
+      "predicted": 0.8063
     },
     "NFL:3": {
       "actual": 1.0,
@@ -90,14 +90,14 @@
       "predicted": 0.8758
     },
     "NHL:1": {
-      "actual": 0.5714,
-      "n": 35,
-      "predicted": 0.7635
+      "actual": 0.5789,
+      "n": 38,
+      "predicted": 0.7646
     },
     "NHL:2": {
-      "actual": 0.7561,
-      "n": 41,
-      "predicted": 0.8009
+      "actual": 0.7778,
+      "n": 45,
+      "predicted": 0.8018
     },
     "NHL:3": {
       "actual": 0.6,
@@ -106,8 +106,8 @@
     }
   },
   "shifts": {
-    "ALL:1": -0.10898,
-    "ALL:2": -0.06227,
+    "ALL:1": -0.11357,
+    "ALL:2": -0.04785,
     "MLB:2": -0.04234
   }
 }
