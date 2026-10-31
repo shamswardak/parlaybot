@@ -1,0 +1,19 @@
+[
+  {
+    "name": "Daily Ticket",
+    "date": "2026-10-30",
+    "status": "LOSS",
+    "n_legs": 6,
+    "hits": 2,
+    "misses": 4,
+    "voids": 0,
+    "total_american": 191,
+    "model_probability": 0.24226,
+    "failed_legs": [
+      "Zach Whitecloud 1+ Shots on Goal \u2014 only got 0, needed 1",
+      "Brayden McNabb 1+ Shots on Goal \u2014 only got 0, needed 1",
+      "Nico Hischier 2+ Shots on Goal \u2014 only got 1, needed 2",
+      "Jake Middleton 1+ Shots on Goal \u2014 only got 0, needed 1"
+    ]
+  }
+]
