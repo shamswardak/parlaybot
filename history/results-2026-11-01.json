@@ -1,0 +1,18 @@
+[
+  {
+    "name": "Daily Ticket",
+    "date": "2026-11-01",
+    "status": "LOSS",
+    "n_legs": 10,
+    "hits": 5,
+    "misses": 3,
+    "voids": 2,
+    "total_american": 471,
+    "model_probability": 0.0977,
+    "failed_legs": [
+      "Kyren Williams 2+ Receptions \u2014 only got 1, needed 2",
+      "Drake Maye 15+ Rushing Yards \u2014 only got 5, needed 15",
+      "Matthew Stafford 21+ Completions \u2014 only got 17, needed 21"
+    ]
+  }
+]
