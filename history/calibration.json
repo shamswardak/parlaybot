@@ -1,9 +1,9 @@
 {
   "counts": {
     "ALL:0": 2,
-    "ALL:1": 96,
-    "ALL:2": 228,
-    "ALL:3": 40,
+    "ALL:1": 99,
+    "ALL:2": 234,
+    "ALL:3": 41,
     "ALL:4": 19,
     "MLB:0": 2,
     "MLB:1": 49,
@@ -11,11 +11,11 @@
     "MLB:3": 30,
     "MLB:4": 9,
     "NFL:1": 6,
-    "NFL:2": 36,
-    "NFL:3": 5,
+    "NFL:2": 37,
+    "NFL:3": 6,
     "NFL:4": 10,
-    "NHL:1": 41,
-    "NHL:2": 62,
+    "NHL:1": 44,
+    "NHL:2": 67,
     "NHL:3": 5
   },
   "observed": {
@@ -25,19 +25,19 @@
       "predicted": 0.6606
     },
     "ALL:1": {
-      "actual": 0.6771,
-      "n": 96,
-      "predicted": 0.7597
+      "actual": 0.6768,
+      "n": 99,
+      "predicted": 0.7601
     },
     "ALL:2": {
-      "actual": 0.7675,
-      "n": 228,
-      "predicted": 0.8019
+      "actual": 0.765,
+      "n": 234,
+      "predicted": 0.8018
     },
     "ALL:3": {
-      "actual": 0.875,
-      "n": 40,
-      "predicted": 0.8491
+      "actual": 0.878,
+      "n": 41,
+      "predicted": 0.8488
     },
     "ALL:4": {
       "actual": 0.7895,
@@ -75,14 +75,14 @@
       "predicted": 0.776
     },
     "NFL:2": {
-      "actual": 0.75,
-      "n": 36,
-      "predicted": 0.8057
+      "actual": 0.7568,
+      "n": 37,
+      "predicted": 0.805
     },
     "NFL:3": {
       "actual": 1.0,
-      "n": 5,
-      "predicted": 0.8405
+      "n": 6,
+      "predicted": 0.8398
     },
     "NFL:4": {
       "actual": 0.7,
@@ -90,14 +90,14 @@
       "predicted": 0.8758
     },
     "NHL:1": {
-      "actual": 0.561,
-      "n": 41,
-      "predicted": 0.7648
+      "actual": 0.5682,
+      "n": 44,
+      "predicted": 0.7654
     },
     "NHL:2": {
-      "actual": 0.7419,
-      "n": 62,
-      "predicted": 0.7991
+      "actual": 0.7313,
+      "n": 67,
+      "predicted": 0.7992
     },
     "NHL:3": {
       "actual": 0.6,
@@ -106,9 +106,9 @@
     }
   },
   "shifts": {
-    "ALL:1": -0.13311,
-    "ALL:2": -0.10859,
+    "ALL:1": -0.13712,
+    "ALL:2": -0.11729,
     "MLB:2": -0.04234,
-    "NHL:2": -0.07683
+    "NHL:2": -0.0953
   }
 }
