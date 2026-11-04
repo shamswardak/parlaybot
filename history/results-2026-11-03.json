@@ -1,0 +1,20 @@
+[
+  {
+    "name": "Daily Ticket",
+    "date": "2026-11-03",
+    "status": "LOSS",
+    "n_legs": 10,
+    "hits": 5,
+    "misses": 5,
+    "voids": 0,
+    "total_american": 437,
+    "model_probability": 0.10391,
+    "failed_legs": [
+      "Mackenzie Blackwood 18+ Saves \u2014 only got 12, needed 18",
+      "Kaiden Guhle 1+ Shots on Goal \u2014 only got 0, needed 1",
+      "Evan Bouchard 2+ Shots on Goal \u2014 only got 1, needed 2",
+      "Quinn Hughes 2+ Shots on Goal \u2014 only got 1, needed 2",
+      "Erik Cernak 1+ Shots on Goal \u2014 only got 0, needed 1"
+    ]
+  }
+]
