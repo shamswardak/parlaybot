@@ -1,0 +1,17 @@
+[
+  {
+    "name": "Daily Ticket",
+    "date": "2026-11-05",
+    "status": "LOSS",
+    "n_legs": 10,
+    "hits": 8,
+    "misses": 2,
+    "voids": 0,
+    "total_american": 498,
+    "model_probability": 0.09342,
+    "failed_legs": [
+      "Noah Hanifin 1+ Shots on Goal \u2014 only got 0, needed 1",
+      "Kaedan Korczak 1+ Shots on Goal \u2014 only got 0, needed 1"
+    ]
+  }
+]
