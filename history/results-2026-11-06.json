@@ -1,0 +1,17 @@
+[
+  {
+    "name": "Daily Ticket",
+    "date": "2026-11-06",
+    "status": "LOSS",
+    "n_legs": 6,
+    "hits": 4,
+    "misses": 2,
+    "voids": 0,
+    "total_american": 203,
+    "model_probability": 0.23256,
+    "failed_legs": [
+      "Valeri Nichushkin 1+ Shots on Goal \u2014 only got 0, needed 1",
+      "Joel Eriksson Ek 3+ Shots on Goal \u2014 only got 2, needed 3"
+    ]
+  }
+]
