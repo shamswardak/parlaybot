@@ -1,0 +1,16 @@
+[
+  {
+    "name": "Daily Ticket",
+    "date": "2026-11-08",
+    "status": "LOSS",
+    "n_legs": 10,
+    "hits": 9,
+    "misses": 1,
+    "voids": 0,
+    "total_american": 480,
+    "model_probability": 0.0963,
+    "failed_legs": [
+      "Dougie Hamilton 2+ Shots on Goal \u2014 only got 1, needed 2"
+    ]
+  }
+]
