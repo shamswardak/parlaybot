@@ -1,0 +1,17 @@
+[
+  {
+    "name": "Daily Ticket",
+    "date": "2026-11-09",
+    "status": "LOSS",
+    "n_legs": 8,
+    "hits": 6,
+    "misses": 2,
+    "voids": 0,
+    "total_american": 336,
+    "model_probability": 0.14395,
+    "failed_legs": [
+      "Vladislav Gavrikov 1+ Shots on Goal \u2014 only got 0, needed 1",
+      "Kasperi Kapanen 1+ Shots on Goal \u2014 only got 0, needed 1"
+    ]
+  }
+]
