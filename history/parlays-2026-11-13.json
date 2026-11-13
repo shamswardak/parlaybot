@@ -1,0 +1,117 @@
+[
+  {
+    "name": "Daily Ticket",
+    "date": "2026-11-13",
+    "n_legs": 4,
+    "n_games": 2,
+    "total_american": -125,
+    "total_decimal": 1.798,
+    "model_probability": 0.44047,
+    "implied_probability": 0.55618,
+    "expected_value": 0.792,
+    "notes": [
+      "Criteria loosened 2 step(s) to fill this: price -351 to -1076",
+      "4 legs, not 10 \u2014 the slate ran out of legs meeting this ticket's criteria even after loosening."
+    ],
+    "legs": [
+      {
+        "sport": "NHL",
+        "game": "NSH @ VGK",
+        "player": "Adam Wilsby",
+        "player_id": "8482482",
+        "stat_key": "shots",
+        "team": "NSH",
+        "market": "Shots on Goal",
+        "threshold": 1,
+        "selection": "Adam Wilsby 1+ Shots on Goal",
+        "est_price": -539,
+        "model_prob": 0.7957,
+        "raw_hit_rate": 0.8667,
+        "record": "8/8 L8 \u00b7 13/15 L15 \u00b7 15/19 season",
+        "streak": 11,
+        "opponent": "VGK",
+        "current_games": 19,
+        "prior_season_only": false,
+        "stale_trend": false,
+        "confidence": 0.941,
+        "notes": [
+          "11-game streak",
+          "calibrated 82%\u219280%"
+        ]
+      },
+      {
+        "sport": "NHL",
+        "game": "NYR @ VAN",
+        "player": "Jake DeBrusk",
+        "player_id": "8478498",
+        "stat_key": "shots",
+        "team": "VAN",
+        "market": "Shots on Goal",
+        "threshold": 1,
+        "selection": "Jake DeBrusk 1+ Shots on Goal",
+        "est_price": -955,
+        "model_prob": 0.854,
+        "raw_hit_rate": 0.8667,
+        "record": "7/8 L8 \u00b7 13/15 L15 \u00b7 15/18 season",
+        "streak": 7,
+        "opponent": "NYR",
+        "current_games": 18,
+        "prior_season_only": false,
+        "stale_trend": false,
+        "confidence": 0.939,
+        "notes": [
+          "7-game streak"
+        ]
+      },
+      {
+        "sport": "NHL",
+        "game": "NSH @ VGK",
+        "player": "Jack Eichel",
+        "player_id": "8478403",
+        "stat_key": "shots",
+        "team": "VGK",
+        "market": "Shots on Goal",
+        "threshold": 1,
+        "selection": "Jack Eichel 1+ Shots on Goal",
+        "est_price": -894,
+        "model_prob": 0.8485,
+        "raw_hit_rate": 0.8,
+        "record": "7/8 L8 \u00b7 12/15 L15 \u00b7 17/20 season",
+        "streak": 5,
+        "opponent": "NSH",
+        "current_games": 20,
+        "prior_season_only": false,
+        "stale_trend": false,
+        "confidence": 0.855,
+        "notes": [
+          "5-game streak"
+        ]
+      },
+      {
+        "sport": "NHL",
+        "game": "NYR @ VAN",
+        "player": "Dylan Garand",
+        "player_id": "8482193",
+        "stat_key": "saves",
+        "team": "NYR",
+        "market": "Saves",
+        "threshold": 16,
+        "selection": "Dylan Garand 16+ Saves",
+        "est_price": -426,
+        "model_prob": 0.764,
+        "raw_hit_rate": 0.7857,
+        "record": "7/8 L8 \u00b7 11/14 L14 \u00b7 11/14 season",
+        "streak": 4,
+        "opponent": "VAN",
+        "current_games": 14,
+        "prior_season_only": false,
+        "stale_trend": false,
+        "confidence": 0.804,
+        "notes": [
+          "4-game streak",
+          "calibrated 80%\u219276%"
+        ]
+      }
+    ]
+  }
+]

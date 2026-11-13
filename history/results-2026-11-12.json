@@ -1,0 +1,18 @@
+[
+  {
+    "name": "Daily Ticket",
+    "date": "2026-11-12",
+    "status": "LOSS",
+    "n_legs": 10,
+    "hits": 6,
+    "misses": 3,
+    "voids": 1,
+    "total_american": 491,
+    "model_probability": 0.0944,
+    "failed_legs": [
+      "Devon Toews 1+ Shots on Goal \u2014 only got 0, needed 1",
+      "Luke Evangelista 2+ Shots on Goal \u2014 only got 0, needed 2",
+      "Nick Suzuki 2+ Shots on Goal \u2014 only got 0, needed 2"
+    ]
+  }
+]
