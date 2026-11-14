@@ -1,0 +1,14 @@
+[
+  {
+    "name": "Daily Ticket",
+    "date": "2026-11-13",
+    "status": "WIN",
+    "n_legs": 4,
+    "hits": 4,
+    "misses": 0,
+    "voids": 0,
+    "total_american": -125,
+    "model_probability": 0.44047,
+    "failed_legs": []
+  }
+]
