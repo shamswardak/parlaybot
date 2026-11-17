@@ -1,0 +1,16 @@
+[
+  {
+    "name": "Daily Ticket",
+    "date": "2026-11-16",
+    "status": "LOSS",
+    "n_legs": 6,
+    "hits": 4,
+    "misses": 1,
+    "voids": 1,
+    "total_american": 170,
+    "model_probability": 0.26114,
+    "failed_legs": [
+      "Logan Cooley 1+ Shots on Goal \u2014 only got 0, needed 1"
+    ]
+  }
+]
