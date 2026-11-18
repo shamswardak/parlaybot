@@ -1,0 +1,17 @@
+[
+  {
+    "name": "Daily Ticket",
+    "date": "2026-11-17",
+    "status": "LOSS",
+    "n_legs": 10,
+    "hits": 7,
+    "misses": 2,
+    "voids": 1,
+    "total_american": 535,
+    "model_probability": 0.08795,
+    "failed_legs": [
+      "Leon Draisaitl 3+ Shots on Goal \u2014 only got 2, needed 3",
+      "Mark Stone 1+ Shots on Goal \u2014 only got 0, needed 1"
+    ]
+  }
+]
