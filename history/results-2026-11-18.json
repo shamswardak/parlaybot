@@ -1,0 +1,16 @@
+[
+  {
+    "name": "Daily Ticket",
+    "date": "2026-11-18",
+    "status": "LOSS",
+    "n_legs": 6,
+    "hits": 5,
+    "misses": 1,
+    "voids": 0,
+    "total_american": 245,
+    "model_probability": 0.20449,
+    "failed_legs": [
+      "Clayton Keller 2+ Shots on Goal \u2014 only got 0, needed 2"
+    ]
+  }
+]
