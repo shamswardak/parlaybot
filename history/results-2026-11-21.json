@@ -1,0 +1,17 @@
+[
+  {
+    "name": "Daily Ticket",
+    "date": "2026-11-21",
+    "status": "LOSS",
+    "n_legs": 10,
+    "hits": 8,
+    "misses": 2,
+    "voids": 0,
+    "total_american": 503,
+    "model_probability": 0.09262,
+    "failed_legs": [
+      "Nick Suzuki 2+ Shots on Goal \u2014 only got 1, needed 2",
+      "Matt Boldy 3+ Shots on Goal \u2014 only got 2, needed 3"
+    ]
+  }
+]
