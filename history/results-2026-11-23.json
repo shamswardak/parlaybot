@@ -1,0 +1,17 @@
+[
+  {
+    "name": "Daily Ticket",
+    "date": "2026-11-23",
+    "status": "LOSS",
+    "n_legs": 6,
+    "hits": 4,
+    "misses": 2,
+    "voids": 0,
+    "total_american": 211,
+    "model_probability": 0.22676,
+    "failed_legs": [
+      "Joe Burrow 5+ Rushing Yards \u2014 only got -1, needed 5",
+      "Tristan Luneau 1+ Shots on Goal \u2014 only got 0, needed 1"
+    ]
+  }
+]
