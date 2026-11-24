@@ -1,0 +1,168 @@
+[
+  {
+    "name": "Daily Ticket",
+    "date": "2026-11-23",
+    "n_legs": 6,
+    "n_games": 3,
+    "total_american": 211,
+    "total_decimal": 3.108,
+    "model_probability": 0.22676,
+    "implied_probability": 0.32171,
+    "expected_value": 0.7049,
+    "notes": [
+      "Criteria loosened 2 step(s) to fill this: price -351 to -1076",
+      "6 legs, not 10 \u2014 the slate ran out of legs meeting this ticket's criteria even after loosening."
+    ],
+    "legs": [
+      {
+        "sport": "NFL",
+        "game": "CIN @ WAS",
+        "player": "Stefon Diggs",
+        "player_id": "00-0031588",
+        "stat_key": "receiving_yards",
+        "team": "WAS",
+        "market": "Receiving Yards",
+        "threshold": 25,
+        "selection": "Stefon Diggs 25+ Receiving Yards",
+        "est_price": -999,
+        "model_prob": 0.8575,
+        "raw_hit_rate": 0.8667,
+        "record": "8/8 L8 \u00b7 13/15 L15 \u00b7 24/29 season",
+        "streak": 8,
+        "opponent": "CIN",
+        "current_games": 8,
+        "prior_season_only": false,
+        "stale_trend": false,
+        "confidence": 0.946,
+        "notes": [
+          "8-game streak",
+          "volatile role"
+        ]
+      },
+      {
+        "sport": "NHL",
+        "game": "MIN @ SJS",
+        "player": "Ivar Stenberg",
+        "player_id": "8486103",
+        "stat_key": "shots",
+        "team": "SJS",
+        "market": "Shots on Goal",
+        "threshold": 1,
+        "selection": "Ivar Stenberg 1+ Shots on Goal",
+        "est_price": -1038,
+        "model_prob": 0.8605,
+        "raw_hit_rate": 0.8667,
+        "record": "7/8 L8 \u00b7 13/15 L15 \u00b7 21/25 season",
+        "streak": 7,
+        "opponent": "MIN",
+        "current_games": 25,
+        "prior_season_only": false,
+        "stale_trend": false,
+        "confidence": 0.94,
+        "notes": [
+          "7-game streak"
+        ]
+      },
+      {
+        "sport": "NHL",
+        "game": "ANA @ SEA",
+        "player": "Matty Beniers",
+        "player_id": "8482665",
+        "stat_key": "shots",
+        "team": "SEA",
+        "market": "Shots on Goal",
+        "threshold": 1,
+        "selection": "Matty Beniers 1+ Shots on Goal",
+        "est_price": -377,
+        "model_prob": 0.7457,
+        "raw_hit_rate": 0.8,
+        "record": "7/8 L8 \u00b7 12/15 L15 \u00b7 15/20 season",
+        "streak": 7,
+        "opponent": "ANA",
+        "current_games": 20,
+        "prior_season_only": false,
+        "stale_trend": false,
+        "confidence": 0.922,
+        "notes": [
+          "7-game streak",
+          "calibrated 78%\u219275%"
+        ]
+      },
+      {
+        "sport": "NFL",
+        "game": "CIN @ WAS",
+        "player": "Joe Burrow",
+        "player_id": "00-0036442",
+        "stat_key": "rushing_yards",
+        "team": "CIN",
+        "market": "Rushing Yards",
+        "threshold": 5,
+        "selection": "Joe Burrow 5+ Rushing Yards",
+        "est_price": -353,
+        "model_prob": 0.7349,
+        "raw_hit_rate": 0.8,
+        "record": "7/8 L8 \u00b7 12/15 L15 \u00b7 12/17 season",
+        "streak": 7,
+        "opponent": "WAS",
+        "current_games": 9,
+        "prior_season_only": false,
+        "stale_trend": false,
+        "confidence": 0.9,
+        "notes": [
+          "7-game streak",
+          "calibrated 75%\u219273%"
+        ]
+      },
+      {
+        "sport": "NHL",
+        "game": "MIN @ SJS",
+        "player": "Yaroslav Askarov",
+        "player_id": "8482137",
+        "stat_key": "saves",
+        "team": "SJS",
+        "market": "Saves",
+        "threshold": 21,
+        "selection": "Yaroslav Askarov 21+ Saves",
+        "est_price": -368,
+        "model_prob": 0.742,
+        "raw_hit_rate": 0.7333,
+        "record": "6/8 L8 \u00b7 11/15 L15 \u00b7 12/16 season",
+        "streak": 5,
+        "opponent": "MIN",
+        "current_games": 16,
+        "prior_season_only": false,
+        "stale_trend": false,
+        "confidence": 0.894,
+        "notes": [
+          "5-game streak",
+          "calibrated 76%\u219274%"
+        ]
+      },
+      {
+        "sport": "NHL",
+        "game": "ANA @ SEA",
+        "player": "Tristan Luneau",
+        "player_id": "8483482",
+        "stat_key": "shots",
+        "team": "ANA",
+        "market": "Shots on Goal",
+        "threshold": 1,
+        "selection": "Tristan Luneau 1+ Shots on Goal",
+        "est_price": -403,
+        "model_prob": 0.7557,
+        "raw_hit_rate": 0.8667,
+        "record": "7/8 L8 \u00b7 13/15 L15 \u00b7 18/24 season",
+        "streak": 5,
+        "opponent": "SEA",
+        "current_games": 24,
+        "prior_season_only": false,
+        "stale_trend": false,
+        "confidence": 0.815,
+        "notes": [
+          "5-game streak",
+          "calibrated 79%\u219276%"
+        ]
+      }
+    ]
+  }
+]
